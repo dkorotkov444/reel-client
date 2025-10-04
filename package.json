@@ -14,5 +14,9 @@
   "bugs": {
     "url": "https://github.com/dkorotkov444/reel-client/issues"
   },
-  "homepage": "https://github.com/dkorotkov444/reel-client#readme"
+  "homepage": "https://github.com/dkorotkov444/reel-client#readme",
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
 }
