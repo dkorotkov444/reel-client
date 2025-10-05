@@ -72,3 +72,28 @@ If you add these scripts, also add `parcel` as a devDependency and run `npm inst
 
 ## License & metadata
 See `package.json` for author, license, and repository links.
+
+## Poster images (TMDb)
+
+- This project uses poster images sourced from The Movie Database (TMDb). Poster URLs have been saved into `tools/movies.js` so the front-end can use direct image links (no runtime scraping).
+- The script used to fetch posters is `tools/fetch_tmdb_posters.js`. It queries the TMDb API once per movie title/year and writes results to `tools/movies-with-posters.json` (and `tools/movies-with-posters.js` with a TMDb attribution header).
+
+How to regenerate posters (local only)
+
+1. Obtain a TMDb API key (requires a free account): https://www.themoviedb.org/settings/api
+2. Set the key in your PowerShell session and run the script from the repo root:
+
+```powershell
+$env:TMDB_API_KEY = "your_tmdb_api_key_here"
+node .\tools\fetch_tmdb_posters.js
+```
+
+3. This writes `tools/movies-with-posters.json` and `tools/movies-with-posters.js` (the latter contains an attribution comment). If you prefer, you can copy the poster URLs into `tools/movies.js`.
+
+Attribution
+
+- Per TMDb terms, include visible attribution in your UI where TMDb content is shown. A minimal attribution line is present in the app footer: "Poster images provided by TMDb" linking to https://www.themoviedb.org/.
+
+Security
+
+- Do not commit your TMDb API key. Use environment variables (as shown) or a local `.env` file excluded via `.gitignore` if you need persistence for development.
