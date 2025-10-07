@@ -7,6 +7,7 @@
 // --- Core Node.js modules (none used here) ---
 
 // --- React and other Third-party libraries (none used here) ---
+import PropTypes from "prop-types";
 
 // --- Local application imports (none required) ---
 
@@ -40,3 +41,19 @@ export const MovieView = ({ movie, onBackClick }) => {
       </div>
     );
   };
+
+MovieView.propTypes = {
+    movie: PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+        image_url: PropTypes.string.isRequired,
+        director: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            bio: PropTypes.string,
+            birth_date: PropTypes.string,
+            death_date: PropTypes.string
+        }).isRequired,
+        release_year: PropTypes.string.isRequired
+    }),
+    onBackClick: PropTypes.func.isRequired
+}; 

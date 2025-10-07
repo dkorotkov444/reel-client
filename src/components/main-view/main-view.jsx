@@ -4,10 +4,11 @@
  * (c) 2025 Dmitri Korotkov
  */
 
-// --- Core Node.js modules (none used here) ---
+// --- Core Node.js modules (none used here) ---A
 
 // --- React and other Third-party libraries ---
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 
 // --- Local application imports ---
 import { MovieCard } from "../movie-card/movie-card";
@@ -17,7 +18,7 @@ import { MovieView } from "../movie-view/movie-view";
 export const MainView = () => {
     // State to hold list of movies (initially hardcoded sample data)
     const [movies, setMovies] = useState([
-        {
+        /*{
             _id: '68cd8259d8540b738fcebeb1',
             movieid: 25,
             title: 'Joker',
@@ -150,18 +151,55 @@ export const MainView = () => {
             name: 'Drama',
             description: 'A genre of storytelling with a serious, rather than humorous, tone. Stories often revolve around compelling characters facing a central conflict, filled with emotional and cathartic moments.'
             }
-        },
+        },*/
     ]);
     const [selectedMovie, setSelectedMovie] = useState(null);
+    let moviesFromApi = [];
 
-    // Movie view (rendered when a movie has been selected)
-    if (selectedMovie) {
-        return <MovieView movie={selectedMovie} onBackClick={() => setSelectedMovie(null)}/>;
-    }
+    // useEffect hook to fetch movie data from API when component mounts
+    useEffect(() => {
+        // Fetch movie data from API or other source
+        fetch('https://reel-movie-api-608b8b4b3a04.herokuapp.com/movies/complete')
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Fetched movie data:', data);
+                moviesFromApi = data.map((doc) => {
+                    return {
+                        _id: doc._id,
+                        title: doc.title,
+                        description: doc.description,
+                        release_year: doc.release_year,
+                        image_url: doc.image_url,
+                        rating_imdb: doc.rating_imdb,
+                        featured: doc.featured,
+                        starring: doc.starring,
+                        director: {
+                            name: doc.director.name,
+                            bio: doc.director.bio,
+                            birth_date: doc.director.birth_date,
+                            death_date: doc.director.death_date
+                        },
+                        genre: {
+                            name: doc.genre.name,
+                            description: doc.genre.description
+                        }
+                    };
+                });
+                setMovies(moviesFromApi);
+            })
+            .catch((error) => {
+                console.error('Error fetching movies:', error);
+            });
+    }, []);
 
     // Check if movies array is empty
     if (movies.length === 0) {
         return <div>The movie list is empty!</div>;
+    }
+
+    // Movie view (rendered when a movie has been selected)
+    if (selectedMovie) {
+        return <MovieView movie={selectedMovie} onBackClick={() => setSelectedMovie(null)}/>;
     }
 
     // Main view (rendered when no movie has been selected)
