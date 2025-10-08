@@ -41,6 +41,7 @@ export const MovieView = ({ movie, onBackClick }) => {
     );
   };
 
+// Prop types validation
 MovieView.propTypes = {
     movie: PropTypes.shape({
         title: PropTypes.string.isRequired,

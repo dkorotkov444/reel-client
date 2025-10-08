@@ -10,6 +10,7 @@ import React from 'react';
 
 // --- Local application imports ---
 
+// Footer component
 export const Footer = () => {
   return (
     <footer style={{ padding: '12px 16px', textAlign: 'center', fontSize: '12px', color: '#666' }}>

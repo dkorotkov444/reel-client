@@ -17,17 +17,21 @@ import { LoginView } from "../login-view/login-view";
 
 // Main view component
 export const MainView = () => {
-    // State to hold list of movies (initially hardcoded sample data)
+    // State variables
+    // Initialize user and token state from local storage if available
     const storedUser = JSON.parse(localStorage.getItem("username"));
     const storedToken = localStorage.getItem("token");
+    // If no user or token in local storage, initialize as null
     const [user, setUser] = useState(storedUser ? storedUser : null);
     const [token, setToken] = useState(storedToken ? storedToken : null);
+    // Movies state to hold array of movie objects fetched from API
     const [movies, setMovies] = useState([]);
+    // Selected movie state to hold the currently selected movie object
     const [selectedMovie, setSelectedMovie] = useState(null);
   
     // useEffect hook to fetch movie data from API when component mounts
     useEffect(() => {
-        // Check if user is logged in
+        // Check if user is logged in, i.e., token is available
         if (!token) return;
         
         // Fetch movie data from API or other source

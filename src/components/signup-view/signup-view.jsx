@@ -17,6 +17,7 @@ export const SignupView = ({ onLoggedIn }) => {
       birth_date: birth_date
     };
 
+    // Send signup request to API
     fetch("https://reel-movie-api-608b8b4b3a04.herokuapp.com/users", {
         method: "POST",
         headers: {
@@ -33,6 +34,7 @@ export const SignupView = ({ onLoggedIn }) => {
     });
   };
 
+  // Rendering the signup form
   return (
     <form onSubmit={handleSubmit}>
 
