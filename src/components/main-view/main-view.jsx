@@ -12,17 +12,28 @@ import { useState, useEffect } from "react";
 // --- Local application imports ---
 import { MovieCard } from "../movie-card/movie-card";
 import { MovieView } from "../movie-view/movie-view";
+import { SignupView } from "../signup-view/signup-view";
+import { LoginView } from "../login-view/login-view";
 
 // Main view component
 export const MainView = () => {
     // State to hold list of movies (initially hardcoded sample data)
+    const storedUser = JSON.parse(localStorage.getItem("username"));
+    const storedToken = localStorage.getItem("token");
+    const [user, setUser] = useState(storedUser ? storedUser : null);
+    const [token, setToken] = useState(storedToken ? storedToken : null);
     const [movies, setMovies] = useState([]);
     const [selectedMovie, setSelectedMovie] = useState(null);
-    
+  
     // useEffect hook to fetch movie data from API when component mounts
     useEffect(() => {
+        // Check if user is logged in
+        if (!token) return;
+        
         // Fetch movie data from API or other source
-        fetch('https://reel-movie-api-608b8b4b3a04.herokuapp.com/movies')
+        fetch('https://reel-movie-api-608b8b4b3a04.herokuapp.com/movies', {
+            headers: { Authorization: `Bearer ${token}` },
+        })
             .then((response) => response.json())
             .then((data) => {
                 const moviesFromApi = data.map((doc) => {
@@ -52,7 +63,22 @@ export const MainView = () => {
             .catch((error) => {
                 console.error('Error fetching movies:', error);
             });
-    }, []);
+    }, [token]);
+
+    // Check if user is logged in
+    if (!user) {
+        return (
+            <>
+            <LoginView 
+                onLoggedIn={(user, token) => { 
+                    setUser(user);
+                    setToken(token);
+                }} />;
+            or
+            <SignupView/>
+            </>
+        );
+    }
 
     // Check if movies array is empty
     if (movies.length === 0) {
@@ -67,15 +93,16 @@ export const MainView = () => {
     // Main view (rendered when no movie has been selected)
     return (
         <div>
-        {movies.map((movie) => (
-            <MovieCard
-            key={movie._id}     // Added key prop here. movie._id is unique identifier (until API is connected)
-            movie={movie}       // Pass complete movie data to MovieCard component
-            onMovieClick={(newSelectedMovie) => {       // Update selected movie state in MainView with data from MovieCard
-                setSelectedMovie(newSelectedMovie);
-            }}
-            />
-        ))}
+            {movies.map((movie) => (
+                <MovieCard
+                key={movie._id}     // Added key prop here. movie._id is unique identifier (until API is connected)
+                movie={movie}       // Pass complete movie data to MovieCard component
+                onMovieClick={(newSelectedMovie) => {       // Update selected movie state in MainView with data from MovieCard
+                    setSelectedMovie(newSelectedMovie);
+                }}
+                />
+            ))}
+            <button onClick={() => {setUser(null); setToken(null); localStorage.clear();}}>Logout</button>
         </div>
     );
 };
