@@ -1,11 +1,11 @@
-/*  src/components/main-view/main-view.jsx
+/*  
+ * src/components/main-view/main-view.jsx
  * Main View file of the REEL movie API client
  *
  * (c) 2025 Dmitri Korotkov
  */
 
-// --- Core Node.js modules (none used here) ---A
-
+// --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import { useState, useEffect } from "react";
 
@@ -77,7 +77,7 @@ export const MainView = () => {
                 onLoggedIn={(user, token) => { 
                     setUser(user);
                     setToken(token);
-                }} />;
+                }} />
             or
             <SignupView/>
             </>

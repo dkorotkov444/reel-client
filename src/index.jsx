@@ -5,15 +5,17 @@
  */
 
 // --- Core Node.js modules (none used here) ---
-
 // --- React and other Third-party libraries ---
 import { createRoot } from 'react-dom/client';
 
 // --- Local application imports ---
 import { MainView } from "./components/main-view/main-view";
 import { Footer } from "./components/footer/footer";
-// Import statement to indicate that you need to bundle `./index.scss`
+// Import statement to indicate the need to bundle `./index.scss`
 import "./index.scss";
+
+// Clear local storage on app start
+localStorage.clear(); 
 
 // Main component (will eventually use all the others)
 const ReelApplication = () => {
