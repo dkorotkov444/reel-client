@@ -5,21 +5,25 @@
  */
 
 // --- Core Node.js modules (none used here) ---
-// --- React and other Third-party libraries (none used here) ---
+// --- React and other Third-party libraries ---
 import PropTypes from "prop-types";
+import { Button, Card } from "react-bootstrap";
 // --- Local application imports (none required) ---
 
 // Movie card component
 export const MovieCard = ({ movie, onMovieClick }) => {
     const { title, description, image_url, genre } = movie;
     return (
-        <div
-            onClick={() => {
-                onMovieClick(movie);  // Call onMovieClick prop function passed from MainView, passing movie data back up
-            }}
-        >
-            {title} {genre.name} {description} {image_url}
-        </div>
+        <Card>
+            <Card.Img variant="top" src={image_url} alt={`${title} poster`} />
+            <Card.Body>
+                <Card.Title>{title}</Card.Title>
+                <Card.Text>{description}</Card.Text>
+                <Button onClick={() => onMovieClick(movie)} variant="link"> 
+                    Open
+                </Button>
+            </Card.Body>
+        </Card>
     );
 };
 

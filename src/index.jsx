@@ -7,11 +7,12 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import { createRoot } from 'react-dom/client';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 // --- Local application imports ---
 import { MainView } from "./components/main-view/main-view";
 import { Footer } from "./components/footer/footer";
-// Import statement to indicate the need to bundle `./index.scss`
+// Import stylesheet
 import "./index.scss";
 
 // Clear local storage on app start

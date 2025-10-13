@@ -25,10 +25,10 @@ export const SignupView = ({ onLoggedIn }) => {
 
         // Prepare data for API request
         const data = {
-        username: username,
-        password: password,
-        email: email,
-        birth_date: birth_date
+            username: username,
+            password: password,
+            email: email,
+            birth_date: birth_date
         };
 
         // Send signup request to API
@@ -39,7 +39,7 @@ export const SignupView = ({ onLoggedIn }) => {
             },
             body: JSON.stringify(data),})
         .then((response) => response.json())
-        .then((data) => {
+        .then((/* data */) => {
             window.location.reload(); // Reload the page to show the login view
         })
         .catch((error) => {
