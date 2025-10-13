@@ -9,7 +9,10 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import { useState } from "react";
-// --- Local application imports ---
+// Import React Bootstrap components
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+// --- Local application imports (none required) ---
 
 // Login view component
 export const LoginView = ({ onLoggedIn }) => {
@@ -49,29 +52,32 @@ export const LoginView = ({ onLoggedIn }) => {
 
     // Rendering the login form
     return (
-        <form onSubmit={handleSubmit}>
-        <label>
-            Username:
-            <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            autoComplete="off"
-            />
-        </label>
+        <Form onSubmit={handleSubmit}>
 
-        <label>
-            Password:
-            <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="new-password"
+            <Form.Group controlId="formUsername">
+            <Form.Label>Username: </Form.Label>
+            <Form.Control
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                autoComplete="off"
             />
-        </label>
-        <button type="submit">Submit</button>
-        </form>
+            </Form.Group>
+
+            <Form.Group controlId="formPassword">
+                <Form.Label>Password: </Form.Label>
+                <Form.Control
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                />
+            </Form.Group>
+        
+            <Button variant="primary" type="submit">Submit</Button>
+
+        </Form>
     );
 };
