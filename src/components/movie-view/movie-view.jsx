@@ -8,8 +8,7 @@
 // --- React and other Third-party libraries (none used here) ---
 import PropTypes from "prop-types";
 // --- React Bootstrap components ---
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
 // --- Local application imports (none required) ---
 
 // Movie view component
@@ -17,7 +16,7 @@ export const MovieView = ({ movie, onBackClick }) => {
     return (
         <div>
             <div>
-            <img src={movie.image_url} className="w-100" />
+            <img src={movie.image_url} className="w-75 mx-auto d-block" alt={`${movie.title} poster`} />
             </div>
             <div>
             <span>Title: </span>
@@ -39,7 +38,7 @@ export const MovieView = ({ movie, onBackClick }) => {
             <span>Release year: </span>
             <span>{movie.release_year}</span>
             </div>
-            <button onClick={onBackClick}>Back</button>
+            <Button variant="primary" onClick={onBackClick}>Back</Button>
         </div>
     );
   };

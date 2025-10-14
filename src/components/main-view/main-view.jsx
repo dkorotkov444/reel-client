@@ -11,12 +11,15 @@ import { useState, useEffect } from "react";
 // --- React Bootstrap components ---
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
+import Pagination from "react-bootstrap/Pagination";
 
 // --- Local application imports ---
 import { MovieCard } from "../movie-card/movie-card";
 import { MovieView } from "../movie-view/movie-view";
 import { SignupView } from "../signup-view/signup-view";
 import { LoginView } from "../login-view/login-view";
+import { Footer } from "../footer/footer";
 
 // Main view component
 export const MainView = () => {
@@ -31,7 +34,21 @@ export const MainView = () => {
     const [movies, setMovies] = useState([]);
     // Selected movie state to hold the currently selected movie object
     const [selectedMovie, setSelectedMovie] = useState(null);
-  
+    // Pagination state to hold the current page number
+    const [currentPage, setCurrentPage] = useState(1); // Start on page 1
+
+    // Boolean constant for Footer visibility - only show Footer when user is logged in and movie posters are on screen
+    const showFooter = user && (selectedMovie || movies.length > 0);
+
+    // Constants for pagination
+    const cardsPerPage = 8;
+    const totalPages = Math.ceil(movies.length / cardsPerPage);
+
+    // Calculate which movies to display
+    const startIndex = (currentPage - 1) * cardsPerPage;
+    const endIndex = startIndex + cardsPerPage;
+    const moviesToShow = movies.slice(startIndex, endIndex);
+
     // useEffect hook to fetch movie data from API when component mounts
     useEffect(() => {
         // Check if user is logged in, i.e., token is available
@@ -72,43 +89,69 @@ export const MainView = () => {
             });
     }, [token]);
 
-    // Check if user is logged in
+    // Render logic
     return (
-        <Row className="justify-content-md-center"> 
-            {!user ? (
-                <Col md={5}>
-                    <LoginView 
-                        onLoggedIn={(user, token) => { 
-                            setUser(user);
-                            setToken(token);
-                        }} />
-                    or
-                    <SignupView/>
-                </Col>
-                ) : selectedMovie ? (
-                    <Col md={8} >    
-                        <MovieView                  // Movie view (rendered when a movie has been selected)
-                            movie={selectedMovie} 
-                            onBackClick={() => setSelectedMovie(null)}
-                        />
+        <>
+            <Row> 
+                {!user ? (                                  // Check if user is logged in
+                    <Col md={5} className="mx-auto">
+                        <LoginView 
+                            onLoggedIn={(user, token) => { 
+                                setUser(user);
+                                setToken(token);
+                            }} />
+                        or
+                        <SignupView/>
                     </Col>
-                ) : (movies.length === 0) ? (   // Check if movies array is empty
-                    <div>The movie list is empty!</div>
-                ) : (
-                    <>
-                        {movies.map((movie) => (    // Main view (rendered when no movie has been selected)
-                            <Col className="mb-5" key={movie._id} md={3}>
-                                <MovieCard
-                                    movie={movie}           // Pass complete movie data to MovieCard component
-                                    onMovieClick={(newSelectedMovie) => {       // Update selected movie state in MainView with data from MovieCard
-                                        setSelectedMovie(newSelectedMovie);
-                                    }}
+                    ) : selectedMovie ? (
+                        <>
+                            <Col md={8} className="mx-auto">    
+                                <MovieView                  // Movie view (rendered when a movie has been selected)
+                                    movie={selectedMovie} 
+                                    onBackClick={() => setSelectedMovie(null)}
                                 />
                             </Col>
-                        ))}
-                        <button onClick={() => {setUser(null); setToken(null); localStorage.clear();}}>Logout</button>
-                    </>
-            )}
-        </Row>
+                            {/* Logout button for the Movie view */}
+                            <Col xs={3} className="mb-4">
+                                <Button onClick={() => {setUser(null); setToken(null); localStorage.clear();}} variant="primary">Logout</Button>
+                            </Col>
+                        </>
+                    ) : (movies.length === 0) ? (   // Check if movies array is empty
+                        <div>The movie list is empty!</div>
+                    ) : (
+                        <>
+                            {moviesToShow.map((movie) => (                        // Main view (rendered when no movie has been selected)
+                                <Col className="mb-5" key={movie._id} md={3}>
+                                    <MovieCard
+                                        movie={movie}                             // Pass complete movie data to MovieCard component
+                                        onMovieClick={(newSelectedMovie) => {     // Update selected movie state in MainView with data from MovieCard
+                                            setSelectedMovie(newSelectedMovie);
+                                        }}
+                                    />
+                                </Col>
+                            ))}
+                            {/* Pagination component */}
+                            {totalPages > 1 && (
+                                <Row className="justify-content-center mt-4">
+                                    <Pagination className="justify-content-center">
+                                        {/* Generate page numbers */}
+                                        {[...Array(totalPages)].map((_, index) => (
+                                            <Pagination.Item 
+                                                key={index + 1} 
+                                                active={index + 1 === currentPage}
+                                                onClick={() => setCurrentPage(index + 1)}
+                                            >
+                                                {index + 1}
+                                            </Pagination.Item>
+                                        ))}
+                                    </Pagination>
+                                </Row>
+                            )}
+                        </>
+                )}
+            </Row>
+            {/* Render Footer based on user login status and movie poster visibility */}
+            {showFooter && <Footer />}
+        </>
     );
 };

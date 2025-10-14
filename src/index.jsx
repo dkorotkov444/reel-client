@@ -12,7 +12,6 @@ import Container from "react-bootstrap/Container";
 
 // --- Local application imports ---
 import { MainView } from "./components/main-view/main-view";
-import { Footer } from "./components/footer/footer";
 // Import stylesheet
 import "./index.scss";
 
@@ -22,12 +21,9 @@ localStorage.clear();
 // Main component (will eventually use all the others)
 const ReelApplication = () => {
     return (
-        <>
-            <Container>
-                <MainView />
-            </Container>
-            <Footer />
-        </>
+        <Container>
+            <MainView />
+        </Container>
     );
 };
 
@@ -35,5 +31,5 @@ const ReelApplication = () => {
 const container = document.querySelector("#root");
 const root = createRoot(container);
 
-// Tells React to render your app in the root DOM element
+// Tells React to render the app in the root DOM element
 root.render(<ReelApplication />);

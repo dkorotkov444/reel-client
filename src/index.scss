@@ -2,8 +2,16 @@
 
 //@import '~bootstrap/scss/bootstrap.scss';
 
-$color: darkblue;
+//$color: darkblue;
+//.reel { color: $color; }
 
-.reel {
-  color: $color;
+/* Enforces multi-line clamping for the movie description */
+.description-clamp {
+    /* Standard properties for text clipping */
+    overflow: hidden;
+    display: -webkit-box;
+    /* Limit to 3 lines before adding "..." */
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
