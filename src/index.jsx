@@ -6,8 +6,9 @@
 
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
-import { createRoot } from 'react-dom/client';
+import { createRoot } from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Container from "react-bootstrap/Container";
 
 // --- Local application imports ---
 import { MainView } from "./components/main-view/main-view";
@@ -20,12 +21,14 @@ localStorage.clear();
 
 // Main component (will eventually use all the others)
 const ReelApplication = () => {
-  return (
-    <>
-      <MainView />
-      <Footer />
-    </>
-  );
+    return (
+        <>
+            <Container style={{ border: "1px solid red" }}>
+                <MainView />
+            </Container>
+            <Footer />
+        </>
+    );
 };
 
 // Finds the root of your app
