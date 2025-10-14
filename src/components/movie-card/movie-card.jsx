@@ -14,7 +14,7 @@ import { Button, Card } from "react-bootstrap";
 export const MovieCard = ({ movie, onMovieClick }) => {
     const { title, description, image_url, genre } = movie;
     return (
-        <Card onClick={() => onMovieClick(movie)} variant="link">
+        <Card className="h-100" onClick={() => onMovieClick(movie)} variant="link">
             <Card.Img variant="top" src={image_url} alt={`${title} poster`} />
             <Card.Body>
                 <Card.Title>{title}</Card.Title>

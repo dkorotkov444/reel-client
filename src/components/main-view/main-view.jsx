@@ -8,6 +8,9 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import { useState, useEffect } from "react";
+// --- React Bootstrap components ---
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 // --- Local application imports ---
 import { MovieCard } from "../movie-card/movie-card";
@@ -17,7 +20,7 @@ import { LoginView } from "../login-view/login-view";
 
 // Main view component
 export const MainView = () => {
-    // State variables
+    // --- State variables ---
     // Initialize user and token state from local storage if available
     const storedUser = JSON.parse(localStorage.getItem("username"));
     const storedToken = localStorage.getItem("token");
@@ -70,43 +73,42 @@ export const MainView = () => {
     }, [token]);
 
     // Check if user is logged in
-    if (!user) {
-        return (
-            <>
-            <LoginView 
-                onLoggedIn={(user, token) => { 
-                    setUser(user);
-                    setToken(token);
-                }} />
-            or
-            <SignupView/>
-            </>
-        );
-    }
-
-    // Check if movies array is empty
-    if (movies.length === 0) {
-        return <div>The movie list is empty!</div>;
-    }
-
-    // Movie view (rendered when a movie has been selected)
-    if (selectedMovie) {
-        return <MovieView movie={selectedMovie} onBackClick={() => setSelectedMovie(null)}/>;
-    }
-
-    // Main view (rendered when no movie has been selected)
     return (
-        <div>
-            {movies.map((movie) => (
-                <MovieCard
-                key={movie._id}     // Added key prop here. movie._id is unique identifier (until API is connected)
-                movie={movie}       // Pass complete movie data to MovieCard component
-                onMovieClick={(newSelectedMovie) => {       // Update selected movie state in MainView with data from MovieCard
-                    setSelectedMovie(newSelectedMovie);
-                }}
-                />
-            ))}
-            <button onClick={() => {setUser(null); setToken(null); localStorage.clear();}}>Logout</button>
-        </div>
+        <Row className="justify-content-md-center"> 
+            {!user ? (
+                <Col md={5}>
+                    <LoginView 
+                        onLoggedIn={(user, token) => { 
+                            setUser(user);
+                            setToken(token);
+                        }} />
+                    or
+                    <SignupView/>
+                </Col>
+                ) : selectedMovie ? (
+                    <Col md={8} >    
+                        <MovieView                  // Movie view (rendered when a movie has been selected)
+                            movie={selectedMovie} 
+                            onBackClick={() => setSelectedMovie(null)}
+                        />
+                    </Col>
+                ) : (movies.length === 0) ? (   // Check if movies array is empty
+                    <div>The movie list is empty!</div>
+                ) : (
+                    <>
+                        {movies.map((movie) => (    // Main view (rendered when no movie has been selected)
+                            <Col className="mb-5" key={movie._id} md={3}>
+                                <MovieCard
+                                    movie={movie}           // Pass complete movie data to MovieCard component
+                                    onMovieClick={(newSelectedMovie) => {       // Update selected movie state in MainView with data from MovieCard
+                                        setSelectedMovie(newSelectedMovie);
+                                    }}
+                                />
+                            </Col>
+                        ))}
+                        <button onClick={() => {setUser(null); setToken(null); localStorage.clear();}}>Logout</button>
+                    </>
+            )}
+        </Row>
     );
 };

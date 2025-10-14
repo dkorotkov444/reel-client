@@ -7,6 +7,9 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries (none used here) ---
 import PropTypes from "prop-types";
+// --- React Bootstrap components ---
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 // --- Local application imports (none required) ---
 
 // Movie view component
@@ -14,7 +17,7 @@ export const MovieView = ({ movie, onBackClick }) => {
     return (
         <div>
             <div>
-            <img src={movie.image_url} />
+            <img src={movie.image_url} className="w-100" />
             </div>
             <div>
             <span>Title: </span>
