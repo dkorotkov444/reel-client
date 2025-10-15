@@ -7,6 +7,7 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries (none used here) ---
 import PropTypes from "prop-types";
+import { Card, CardImg } from "react-bootstrap";
 // --- React Bootstrap components ---
 import Button from "react-bootstrap/Button";
 // --- Local application imports (none required) ---
@@ -14,32 +15,19 @@ import Button from "react-bootstrap/Button";
 // Movie view component
 export const MovieView = ({ movie, onBackClick }) => {
     return (
-        <div>
-            <div>
-            <img src={movie.image_url} className="w-75 mx-auto d-block" alt={`${movie.title} poster`} />
-            </div>
-            <div>
-            <span>Title: </span>
-            <span>{movie.title}</span>
-            </div>
-            <div>
-            <span>Description: </span>
-            <span>{movie.description}</span>
-            </div>
-            <div>
-            <span>Director: </span>
-            <span>{movie.director.name}</span>
-            </div>
-            <div>
-            <span>Genre: </span>
-            <span>{movie.genre.name}</span>
-            </div>
-            <div>
-            <span>Release year: </span>
-            <span>{movie.release_year}</span>
-            </div>
+        <>
+            <Card>
+                <CardImg src={movie.image_url} className="w-75 mx-auto d-block" alt={`${movie.title} poster`} />
+                <Card.Body>
+                    <Card.Title>{movie.title}</Card.Title>
+                    <Card.Text>Plot: {movie.description}</Card.Text>
+                    <Card.Text>Director: {movie.director.name}</Card.Text>
+                    <Card.Text>Genre: {movie.genre.name}</Card.Text>
+                    <Card.Text>Release year: {movie.release_year}</Card.Text>
+                </Card.Body>
+            </Card>
             <Button variant="primary" onClick={onBackClick}>Back</Button>
-        </div>
+        </>
     );
   };
 
