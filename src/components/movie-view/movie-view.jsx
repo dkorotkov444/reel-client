@@ -7,13 +7,21 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries (none used here) ---
 import PropTypes from "prop-types";
-import { Card, CardImg } from "react-bootstrap";
+
 // --- React Bootstrap components ---
+import { Card, CardImg } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
+import { useParams } from "react-router";
+import { Link } from "react-router-dom";
+
 // --- Local application imports (none required) ---
+//import "./movie-view.scss";
 
 // Movie view component
-export const MovieView = ({ movie, onBackClick }) => {
+export const MovieView = ({ movies }) => {
+    const { movieId } = useParams();
+    const movie = movies.find(m => m._id === movieId);
+
     return (
     <>
         <Card>
@@ -26,7 +34,9 @@ export const MovieView = ({ movie, onBackClick }) => {
                 <Card.Text>Release year: {movie.release_year}</Card.Text>
             </Card.Body>
         </Card>
-        <Button variant="primary" onClick={onBackClick}>Back</Button>
+        <Link to={"/"}>
+            <Button variant="back-button">Back</Button>
+        </Link>
     </>
     );
   };
@@ -34,6 +44,7 @@ export const MovieView = ({ movie, onBackClick }) => {
 // Prop types validation
 MovieView.propTypes = {
     movie: PropTypes.shape({
+        _id: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
         description: PropTypes.string.isRequired,
         release_year: PropTypes.string.isRequired,
