@@ -5,17 +5,13 @@
  */
 
 // --- Core Node.js modules (none used here) ---
-// --- React and other Third-party libraries (none used here) ---
+// --- React and other Third-party libraries ---
 import PropTypes from "prop-types";
-
-// --- React Bootstrap components ---
-import { Card, CardImg } from "react-bootstrap";
-import Button from "react-bootstrap/Button";
+import { Button, Card, CardImg } from "react-bootstrap";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 
 // --- Local application imports (none required) ---
-//import "./movie-view.scss";
 
 // Movie view component
 export const MovieView = ({ movies }) => {

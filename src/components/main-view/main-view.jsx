@@ -8,11 +8,7 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import { useState, useEffect } from "react";
-// --- React Bootstrap components ---
-import Button from "react-bootstrap/Button";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
-import Pagination from "react-bootstrap/Pagination";
+import { Col, Row, Pagination } from "react-bootstrap";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // --- Local application imports ---
@@ -31,12 +27,11 @@ export const MainView = () => {
     // If no user or token in local storage, initialize as null
     const [user, setUser] = useState(storedUser ? storedUser : null);
     const [token, setToken] = useState(storedToken ? storedToken : null);
-    // Movies state to hold array of movie objects fetched from API
-    const [movies, setMovies] = useState([]);
-    // Selected movie state to hold the currently selected movie object
-    const [selectedMovie, setSelectedMovie] = useState(null);
-    // Pagination state to hold the current page number
-    const [currentPage, setCurrentPage] = useState(1); // Start on page 1
+    
+    const [movies, setMovies] = useState([]);                 // Movies state to hold the list of movies fetched from the API
+    const [selectedMovie, setSelectedMovie] = useState(null); // Selected movie state to hold the currently selected movie object
+    const [loading, setLoading] = useState(true);             // Movie loading state
+    const [currentPage, setCurrentPage] = useState(1);        // Pagination state to hold the current page number (start on page 1)
 
     // Boolean constant for Footer visibility - only show Footer when user is logged in and movie posters are on screen
     const showFooter = user && (selectedMovie || movies.length > 0);
@@ -54,7 +49,10 @@ export const MainView = () => {
     useEffect(() => {
         // Check if user is logged in, i.e., token is available
         if (!token) return;
-        
+
+        // Set loading state to true before fetching
+        setLoading(true);
+
         // Fetch movie data from API or other source
         fetch('https://reel-movie-api-608b8b4b3a04.herokuapp.com/movies', {
             headers: { Authorization: `Bearer ${token}` },
@@ -84,9 +82,11 @@ export const MainView = () => {
                     };
                 });
                 setMovies(moviesFromApi);
+                setLoading(false); // Set loading state to false after data is fetched
             })
             .catch((error) => {
                 console.error('Error fetching movies:', error);
+                setLoading(false); // Set loading state to false in case of error
             });
     }, [token]);
 
@@ -129,7 +129,9 @@ export const MainView = () => {
                             <>
                             {!user ? ( 
                                 <Navigate to="/login" replace/> 
-                            ) : (movies.length === 0) ? (   // Check if movies array is empty
+                            ) : loading ? (     // If loading state is true, show loading message
+                                <Col>Loading movies...</Col>
+                            ) : (movies.length === 0) ? (   // If not loading, check if movies array is empty
                                 <Col>The movie list is empty!</Col>
                             ) : (
                                 <Col md={8} className="mx-auto">
@@ -146,7 +148,9 @@ export const MainView = () => {
                             <>
                             {!user ? ( 
                                 <Navigate to="/login" replace/> 
-                            ) : (movies.length === 0) ? (   // Check if movies array is empty
+                            ) : loading ? (     // If loading state is true, show loading message
+                                <Col>Loading movies...</Col>
+                            ) : (movies.length === 0) ? (   // If not loading, check if movies array is empty
                                 <Col>The movie list is empty!</Col>
                             ) : (
                                 <>

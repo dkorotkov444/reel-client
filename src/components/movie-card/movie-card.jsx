@@ -9,6 +9,7 @@
 import PropTypes from "prop-types";
 import { Button, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+
 // --- Local application imports (none required) ---
 
 // Movie card component

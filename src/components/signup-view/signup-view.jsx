@@ -7,11 +7,11 @@
  */
 
 // --- Core Node.js modules (none used here) ---
+
 // --- React and other Third-party libraries ---
 import { useState } from "react";
-// Import React Bootstrap components
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import { Button, Form} from "react-bootstrap";
+
 // --- Local application imports ---
 
 // Signup view component

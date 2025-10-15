@@ -4,10 +4,7 @@
  */
 
 // --- Core Node.js modules (none used here) ---
-
 // --- React and other Third-party libraries ---
-//import React from "react";
-
 // --- Local application imports ---
 
 // Footer component
