@@ -15,19 +15,19 @@ import Button from "react-bootstrap/Button";
 // Movie view component
 export const MovieView = ({ movie, onBackClick }) => {
     return (
-        <>
-            <Card>
-                <CardImg src={movie.image_url} className="w-75 mx-auto d-block" alt={`${movie.title} poster`} />
-                <Card.Body>
-                    <Card.Title>{movie.title}</Card.Title>
-                    <Card.Text>Plot: {movie.description}</Card.Text>
-                    <Card.Text>Director: {movie.director.name}</Card.Text>
-                    <Card.Text>Genre: {movie.genre.name}</Card.Text>
-                    <Card.Text>Release year: {movie.release_year}</Card.Text>
-                </Card.Body>
-            </Card>
-            <Button variant="primary" onClick={onBackClick}>Back</Button>
-        </>
+    <>
+        <Card>
+            <CardImg src={movie.image_url} className="w-75 mx-auto d-block" alt={`${movie.title} poster`} />
+            <Card.Body>
+                <Card.Title>{movie.title}</Card.Title>
+                <Card.Text>Plot: {movie.description}</Card.Text>
+                <Card.Text>Director: {movie.director.name}</Card.Text>
+                <Card.Text>Genre: {movie.genre.name}</Card.Text>
+                <Card.Text>Release year: {movie.release_year}</Card.Text>
+            </Card.Body>
+        </Card>
+        <Button variant="primary" onClick={onBackClick}>Back</Button>
+    </>
     );
   };
 

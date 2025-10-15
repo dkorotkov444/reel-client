@@ -104,50 +104,50 @@ export const MainView = () => {
                         <SignupView/>
                     </Col>
                     ) : selectedMovie ? (
-                        <>
-                            <Col md={8} className="mx-auto">    
-                                <MovieView                  // Movie view (rendered when a movie has been selected)
-                                    movie={selectedMovie} 
-                                    onBackClick={() => setSelectedMovie(null)}
-                                />
-                            </Col>
-                            {/* Logout button for the Movie view */}
-                            <Col xs={3} className="mb-4">
-                                <Button onClick={() => {setUser(null); setToken(null); localStorage.clear();}} variant="primary">Logout</Button>
-                            </Col>
-                        </>
+                    <>
+                        <Col md={8} className="mx-auto">    
+                            <MovieView                  // Movie view (rendered when a movie has been selected)
+                                movie={selectedMovie} 
+                                onBackClick={() => setSelectedMovie(null)}
+                            />
+                        </Col>
+                        {/* Logout button for the Movie view */}
+                        <Col xs={3} className="mb-4">
+                            <Button onClick={() => {setUser(null); setToken(null); localStorage.clear();}} variant="primary">Logout</Button>
+                        </Col>
+                    </>
                     ) : (movies.length === 0) ? (   // Check if movies array is empty
                         <div>The movie list is empty!</div>
                     ) : (
-                        <>
-                            {moviesToShow.map((movie) => (                        // Main view (rendered when no movie has been selected)
-                                <Col className="mb-5" key={movie._id} md={3}>
-                                    <MovieCard
-                                        movie={movie}                             // Pass complete movie data to MovieCard component
-                                        onMovieClick={(newSelectedMovie) => {     // Update selected movie state in MainView with data from MovieCard
-                                            setSelectedMovie(newSelectedMovie);
-                                        }}
-                                    />
-                                </Col>
-                            ))}
-                            {/* Pagination component */}
-                            {totalPages > 1 && (
-                                <Row className="justify-content-center mt-4">
-                                    <Pagination className="justify-content-center">
-                                        {/* Generate page numbers */}
-                                        {[...Array(totalPages)].map((_, index) => (
-                                            <Pagination.Item 
-                                                key={index + 1} 
-                                                active={index + 1 === currentPage}
-                                                onClick={() => setCurrentPage(index + 1)}
-                                            >
-                                                {index + 1}
-                                            </Pagination.Item>
-                                        ))}
-                                    </Pagination>
-                                </Row>
-                            )}
-                        </>
+                    <>
+                        {moviesToShow.map((movie) => (                        // Main view (rendered when no movie has been selected)
+                            <Col className="mb-5" key={movie._id} md={3}>
+                                <MovieCard
+                                    movie={movie}                             // Pass complete movie data to MovieCard component
+                                    onMovieClick={(newSelectedMovie) => {     // Update selected movie state in MainView with data from MovieCard
+                                        setSelectedMovie(newSelectedMovie);
+                                    }}
+                                />
+                            </Col>
+                        ))}
+                        {/* Pagination component */}
+                        {totalPages > 1 && (
+                            <Row className="justify-content-center mt-4">
+                                <Pagination className="justify-content-center">
+                                    {/* Generate page numbers */}
+                                    {[...Array(totalPages)].map((_, index) => (
+                                        <Pagination.Item 
+                                            key={index + 1} 
+                                            active={index + 1 === currentPage}
+                                            onClick={() => setCurrentPage(index + 1)}
+                                        >
+                                            {index + 1}
+                                        </Pagination.Item>
+                                    ))}
+                                </Pagination>
+                            </Row>
+                        )}
+                    </>
                 )}
             </Row>
             {/* Render Footer based on user login status and movie poster visibility */}
