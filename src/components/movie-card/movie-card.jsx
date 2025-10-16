@@ -17,8 +17,8 @@ export const MovieCard = ({ movie }) => {
     const { title, description, image_url, genre } = movie;
     return (
         <Card className="h-100">
-            <Card.Img variant="top" src={image_url} alt={`${title} poster`} />
-            <Card.Body>
+            <Card.Img className="card-img-fixed-height" variant="top" src={image_url} alt={`${title} poster`} />
+            <Card.Body className="card-body-compact">
                 <Card.Title>{title}</Card.Title>
                 <Card.Text className="description-clamp">{description}</Card.Text>
                 <Card.Text className="text-end">{genre.name}</Card.Text>

@@ -15,3 +15,22 @@
     line-clamp: 3;
     -webkit-box-orient: vertical;
 }
+
+/* Controls the maximum height of the card image */
+.card-img-fixed-height {
+    max-height: 200px; /* Adjust this value (e.g., 150px, 250px) until two rows fit */
+    width: auto;      /* Keep the original width/aspect ratio */
+    object-fit: contain; /* Ensures the whole image is visible without cropping/stretching */
+    margin: 0 auto; /* Center the image if it's narrower than the card */
+    display: block;
+}
+
+/* Optional: Reduce vertical padding in the card body for a shorter card */
+.card-body-compact {
+    padding: 0.5rem; /* Reduced padding (Bootstrap default is 1rem) */
+}
+
+/* Custom class for height: 100vh - Navbar height (~70px) */
+.vh-minus-navbar {
+    height: calc(100vh - 70px);
+}

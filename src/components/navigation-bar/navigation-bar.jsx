@@ -15,12 +15,12 @@ import { Link } from "react-router-dom";
 
 export const NavigationBar = ({ user, onLoggedOut }) => {
     return (
-        <Navbar expand="lg" className="bg-body-tertiary">
+        <Navbar expand="lg" className="bg-body-tertiary align-items-end">
             <Container>
-                <Navbar.Brand href="../../../public/img/favicon-32x32.png">REEL Movie Application</Navbar.Brand>
+                <Navbar.Brand href="/">REEL Movie Application</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="me-auto">
+                    <Nav className="ms-3 me-auto">
                         {!user && (
                             <>
                             <Nav.Link as={Link} to="/login">Login</Nav.Link>
@@ -31,10 +31,13 @@ export const NavigationBar = ({ user, onLoggedOut }) => {
                             <>
                             <Nav.Link as={Link} to="/">Home</Nav.Link>
                             <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
-                            <Nav.Link onClick={onLoggedOut} >Logout</Nav.Link>
+
                             </>
                         )}
                     </Nav>
+                    {user && (
+                        <Nav.Link onClick={onLoggedOut} className="ms-auto text-primary">Logout</Nav.Link>
+                    )}
                 </Navbar.Collapse>
             </Container>
         </Navbar>

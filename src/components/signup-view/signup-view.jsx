@@ -11,6 +11,7 @@
 // --- React and other Third-party libraries ---
 import { useState } from "react";
 import { Button, Form} from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 // --- Local application imports ---
 
@@ -101,7 +102,12 @@ export const SignupView = ({ onLoggedIn }) => {
                 />
             </Form.Group>
 
-            <Button variant="primary" type="submit">Submit</Button>
+            {/* For optics: wrap the button in d-flex justify-content-end */}
+            <div className="d-flex flex-column align-items-end mt-3">
+                <Button className="ms-auto" variant="primary" type="submit">Sign up</Button>
+                {/* Link to Login view 
+                <Link to="/login" className="mt-2">Already have an account? Log in</Link>*/}
+            </div>
 
         </Form>
     );

@@ -9,7 +9,7 @@
 // --- React and other Third-party libraries ---
 import { useState, useEffect } from "react";
 import { Col, Row, Pagination } from "react-bootstrap";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 // --- Local application imports ---
 import { MovieCard } from "../movie-card/movie-card";
@@ -30,12 +30,11 @@ export const MainView = () => {
     const [token, setToken] = useState(storedToken ? storedToken : null);
     
     const [movies, setMovies] = useState([]);                 // Movies state to hold the list of movies fetched from the API
-    const [selectedMovie, setSelectedMovie] = useState(null); // Selected movie state to hold the currently selected movie object
     const [loading, setLoading] = useState(true);             // Movie loading state
     const [currentPage, setCurrentPage] = useState(1);        // Pagination state to hold the current page number (start on page 1)
 
     // Boolean constant for Footer visibility - only show Footer when user is logged in and movie posters are on screen
-    const showFooter = user && (selectedMovie || movies.length > 0);
+    const showFooter = user && (!loading || movies.length > 0);
 
     // Constants for pagination
     const cardsPerPage = 8;
@@ -95,105 +94,108 @@ export const MainView = () => {
     return (
         <BrowserRouter>
             <NavigationBar user={user} onLoggedOut={() => {setUser(null); setToken(null); localStorage.clear();}} />
-            <Row className="justify-content-md-center"> 
-                <Routes>
-                    <Route
-                        path="/signup"
-                        element={
-                            <>
-                            {!user ? ( 
-                                <Navigate to="/" /> 
-                            ) : (   
-                                <Col md={5} className="mx-auto">
-                                    <SignupView/>
-                                </Col>
-                            )}
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/login"
-                        element={
-                            <>
-                            {user ? ( 
-                                <Navigate to="/" /> 
-                            ) : (   
-                                <Col md={5} className="mx-auto">
-                                    <LoginView onLoggedIn={(user, token) => { setUser(user); setToken(token); }} />
-                                </Col>
-                            )}
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/movies/:movieId"
-                        element={
-                            <>
-                            {!user ? ( 
-                                <Navigate to="/login" replace/> 
-                            ) : loading ? (     // If loading state is true, show loading message
-                                <Col>Loading movies...</Col>
-                            ) : (movies.length === 0) ? (   // If not loading, check if movies array is empty
-                                <Col>The movie list is empty!</Col>
-                            ) : (
-                                <Col md={8} className="mx-auto">
-                                    {/* Movie view (rendered when a movie has been selected) */}
-                                    <MovieView movies={movies}   />
-                                </Col>
-                            )}
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/"
-                        element={
-                            <>
-                            {!user ? ( 
-                                <Navigate to="/login" replace/> 
-                            ) : loading ? (     // If loading state is true, show loading message
-                                <Col>Loading movies...</Col>
-                            ) : (movies.length === 0) ? (   // If not loading, check if movies array is empty
-                                <Col>The movie list is empty!</Col>
-                            ) : (
+
+            {/* NEW CONTAINER: Takes up remaining vertical space (vh - Navbar height) and enables vertical centering */}
+            <div className="vh-minus-navbar d-flex flex-column"> 
+
+                {/* Content Row: flex-grow-1 makes it fill the space. align-items-center centers the content (the forms) vertically. */}
+                <Row className="justify-content-md-center align-items-center flex-grow-1"> 
+                    <Routes>
+                        <Route
+                            path="/signup"
+                            element={
                                 <>
-                                    {/* Main view - movie cards (rendered when no movie selected) */}
-                                    {moviesToShow.map((movie) => (                        
-                                        <Col className="mb-5" key={movie._id} md={3}>
-                                            {/* Pass complete movie data to MovieCard component */}
-                                            <MovieCard movie={movie} />
-                                        </Col>                                        
-                                    ))}
-                                    {/* Pagination component */}
-                                    {totalPages > 1 && (
-                                        <Row className="justify-content-center mt-4">
-                                            <Pagination className="justify-content-center">
-                                                {/* Generate page numbers */}
-                                                {[...Array(totalPages)].map((_, index) => (
-                                                    <Pagination.Item 
-                                                        key={index + 1} 
-                                                        active={index + 1 === currentPage}
-                                                        onClick={() => setCurrentPage(index + 1)}
-                                                    >
-                                                        {index + 1}
-                                                    </Pagination.Item>
-                                                ))}
-                                            </Pagination>
-                                        </Row>
-                                    )}
+                                {user ? ( 
+                                    <Navigate to="/" /> 
+                                ) : (   
+                                    <Col md={5} className="mx-auto">
+                                        <SignupView/>
+                                    </Col>
+                                )}
                                 </>
-                            )}
-                            </>
-                        }
-                    />
-                </Routes>
-            </Row>
-            {/* Logout button for the Movie view 
-            <Col xs={3} className="mb-4">
-                <Button onClick={() => {setUser(null); setToken(null); localStorage.clear();}} variant="primary">Logout</Button>
-            </Col>
-            */}
+                            }
+                        />
+                        <Route
+                            path="/login"
+                            element={
+                                <>
+                                {user ? ( 
+                                    <Navigate to="/" /> 
+                                ) : (   
+                                    <Col md={5} className="mx-auto">
+                                        <LoginView onLoggedIn={(user, token) => { setUser(user); setToken(token); }} />
+                                    </Col>
+                                )}
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/movies/:movieId"
+                            element={
+                                <>
+                                {!user ? ( 
+                                    <Navigate to="/login" replace/> 
+                                ) : loading ? (     // If loading state is true, show loading message
+                                    <Col>Loading movies...</Col>
+                                ) : (movies.length === 0) ? (   // If not loading, check if movies array is empty
+                                    <Col>The movie list is empty!</Col>
+                                ) : (
+                                    <Col md={8} className="mx-auto">
+                                        {/* Movie view (rendered when a movie has been selected) */}
+                                        <MovieView movies={movies}   />
+                                    </Col>
+                                )}
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/"
+                            element={
+                                <>
+                                {!user ? ( 
+                                    <Navigate to="/login" replace/> 
+                                ) : loading ? (     // If loading state is true, show loading message
+                                    <Col>Loading movies...</Col>
+                                ) : (movies.length === 0) ? (   // If not loading, check if movies array is empty
+                                    <Col>The movie list is empty!</Col>
+                                ) : (
+                                    <>
+                                        {/* Main view - movie cards (rendered when no movie selected) */}
+                                        {moviesToShow.map((movie) => (                        
+                                            <Col className="mb-5" key={movie._id} md={3}>
+                                                {/* Pass complete movie data to MovieCard component */}
+                                                <MovieCard movie={movie} />
+                                            </Col>                                        
+                                        ))}
+                                        {/* Pagination component */}
+                                        {totalPages > 1 && (
+                                            <Row className="justify-content-center mt-4">
+                                                <Pagination className="justify-content-center">
+                                                    {/* Generate page numbers */}
+                                                    {[...Array(totalPages)].map((_, index) => (
+                                                        <Pagination.Item 
+                                                            key={index + 1} 
+                                                            active={index + 1 === currentPage}
+                                                            onClick={() => setCurrentPage(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </Pagination.Item>
+                                                    ))}
+                                                </Pagination>
+                                            </Row>
+                                        )}
+                                    </>
+                                )}
+                                </>
+                            }
+                        />
+                    </Routes>
+                </Row>
+            </div>
+
             {/* Render Footer based on user login status and movie poster visibility */}
             {showFooter && <Footer />}
+
         </BrowserRouter>
     );
 };

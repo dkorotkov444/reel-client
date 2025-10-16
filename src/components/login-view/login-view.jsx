@@ -10,6 +10,7 @@
 // --- React and other Third-party libraries ---
 import { useState } from "react";
 import {Button, Form} from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 // --- Local application imports (none required) ---
 
@@ -51,32 +52,41 @@ export const LoginView = ({ onLoggedIn }) => {
 
     // Rendering the login form
     return (
-        <Form onSubmit={handleSubmit}>
+        <>
+            <Form onSubmit={handleSubmit}>
 
-            <Form.Group controlId="formUsername">
-            <Form.Label>Username: </Form.Label>
-            <Form.Control
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoComplete="off"
-            />
-            </Form.Group>
-
-            <Form.Group controlId="formPassword">
-                <Form.Label>Password: </Form.Label>
+                <Form.Group controlId="formUsername">
+                <Form.Label>Username: </Form.Label>
                 <Form.Control
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
-                    autoComplete="new-password"
+                    autoComplete="off"
                 />
-            </Form.Group>
-        
-            <Button variant="primary" type="submit">Submit</Button>
+                </Form.Group>
 
-        </Form>
+                <Form.Group controlId="formPassword">
+                    <Form.Label>Password: </Form.Label>
+                    <Form.Control
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                    />
+                </Form.Group>
+
+                {/* For optics: wrap the button in d-flex justify-content-end */}
+                <div className="d-flex justify-content-end mt-3">
+                    <Button variant="primary" type="submit">Login</Button>
+                </div>
+
+            </Form>
+            {/* Link to Signup view 
+            <div className="text-end mt-2"> 
+                <Link to="/signup">Don't have an account? Sign up</Link>
+            </div>*/}
+        </>
     );
 };
