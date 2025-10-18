@@ -21,7 +21,7 @@ export const MovieView = ({ movies }) => {
     return (
     <>
         <Card>
-            <CardImg src={movie.image_url} className="w-75 mx-auto d-block" alt={`${movie.title} poster`} />
+            <CardImg src={movie.image_url} className="w-50 mx-auto d-block" alt={`${movie.title} poster`} />
             <Card.Body>
                 <Card.Title>{movie.title}</Card.Title>
                 <Card.Text>Plot: {movie.description}</Card.Text>

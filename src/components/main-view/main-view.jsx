@@ -99,7 +99,7 @@ export const MainView = () => {
             <div className="vh-minus-navbar d-flex flex-column"> 
 
                 {/* Content Row: flex-grow-1 makes it fill the space. align-items-center centers the content (the forms) vertically. */}
-                <Row className="justify-content-md-center align-items-center flex-grow-1"> 
+                <Row className="align-items-center flex-grow-1">
                     <Routes>
                         <Route
                             path="/signup"

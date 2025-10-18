@@ -20,24 +20,32 @@ export const NavigationBar = ({ user, onLoggedOut }) => {
                 <Navbar.Brand href="/">REEL Movie Application</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="ms-3 me-auto">
-                        {!user && (
-                            <>
-                            <Nav.Link as={Link} to="/login">Login</Nav.Link>
-                            <Nav.Link as={Link} to="/signup">Signup</Nav.Link>
-                            </>
-                        )}
-                        {user && (
-                            <>
+
+                    {/* Logged In Navigation (Home/Profile - Left Aligned) */}
+                    {user && (
+                        <Nav className="ms-3 me-auto">
                             <Nav.Link as={Link} to="/">Home</Nav.Link>
                             <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
+                        </Nav>
+                    )}
 
-                            </>
-                        )}
-                    </Nav>
+                    {/* Logged Out Navigation (Login/Signup - Right Aligned) 
+                        FIX: This block uses ms-auto to push itself and its contents to the far right 
+                        when the user is not logged in.
+                    */}
+                    {!user && (
+                        <Nav className="ms-auto"> 
+                            <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                            <Nav.Link as={Link} to="/signup">Signup</Nav.Link>
+                        </Nav>
+                    )}
+
+                    {/* Logout Link (Right Aligned, visible only when logged in) 
+                        This Nav.Link is outside the main Nav to ensure it  aligns right using the ms-auto class. */}
                     {user && (
                         <Nav.Link onClick={onLoggedOut} className="ms-auto text-primary">Logout</Nav.Link>
                     )}
+
                 </Navbar.Collapse>
             </Container>
         </Navbar>
