@@ -38,15 +38,17 @@ export const LoginView = ({ onLoggedIn }) => {
         })
         .then((response) => response.json())
         .then((data) => {
-            // Handle cases where username might be under different keys in the response
-            const username = data?.username || data?.user?.username || null;
+            // data.user is now the publicProfile (full user object minus password)
+            const user = data?.user || null;
             const token = data?.token || null;
-            if (username) {
-                localStorage.setItem("username", JSON.stringify(username));    // Store username in local storage
-                localStorage.setItem("token", token);                          // Store JWT token in local storage
-                onLoggedIn(username, token);                        // Notify parent component (MainView) about successful login
+            if (user && token) {
+                // Store the full user object and token in local storage
+                localStorage.setItem("user", JSON.stringify(user));
+                localStorage.setItem("token", token);
+                // Pass the full user object and token to the parent component (MainView)
+                onLoggedIn(user, token);     
             } else {
-                alert("User does not exist");
+                alert(data?.message || "User does not exist");
             }
         })
         .catch((error) => {

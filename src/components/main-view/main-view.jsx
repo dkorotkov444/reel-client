@@ -9,7 +9,7 @@
 // --- React and other Third-party libraries ---
 import { useState, useEffect } from "react";
 import { Col, Row, Pagination } from "react-bootstrap";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // --- Local application imports ---
 import { MovieCard } from "../movie-card/movie-card";
@@ -18,12 +18,13 @@ import { LoginView } from "../login-view/login-view";
 import { SignupView } from "../signup-view/signup-view";
 import { NavigationBar } from "../navigation-bar/navigation-bar";
 import { Footer } from "../footer/footer";
+import { ProfileView } from "../profile-view/profile-view";
 
 // Main view component
 export const MainView = () => {
     // --- State variables ---
     // Initialize user and token state from local storage if available
-    const storedUser = JSON.parse(localStorage.getItem("username"));
+    const storedUser = JSON.parse(localStorage.getItem("user"));
     const storedToken = localStorage.getItem("token");
     // If no user or token in local storage, initialize as null
     const [user, setUser] = useState(storedUser ? storedUser : null);
@@ -37,18 +38,53 @@ export const MainView = () => {
     const showFooter = user && (!loading || movies.length > 0);
 
     // Constants for pagination
-    const cardsPerPage = 8;
-    const totalPages = Math.ceil(movies.length / cardsPerPage);
+    const itemsPerPage = 8;
+    const totalPages = Math.ceil(movies.length / itemsPerPage);
 
     // Calculate which movies to display
-    const startIndex = (currentPage - 1) * cardsPerPage;
-    const endIndex = startIndex + cardsPerPage;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
     const moviesToShow = movies.slice(startIndex, endIndex);
+
+    // --- Favorite Toggle Function ---
+    const handleToggleFavorite = (movieId, isAdding) => {
+        if (!token || !user || !user.username) return;
+
+        // Use the short path /users/:username/:movieId
+        const url = `https://reel-movie-api-608b8b4b3a04.herokuapp.com/users/${user.username}/${movieId}`;
+        
+        // Conditional method: PATCH for adding, DELETE for removing
+        const method = isAdding ? "PATCH" : "DELETE";
+
+        fetch(url, {
+            method: method,
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Could not update favorites.");
+            }
+            // API returns the updated full user object (publicProfile)
+            return response.json(); 
+        })
+        .then((updatedUser) => {
+            // Update state and local storage with the full user object
+            setUser(updatedUser);
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+        })
+        .catch(error => {
+            console.error("Favorite toggle error:", error);
+            alert("Failed to update favorites.");
+        });
+    };
 
     // useEffect hook to fetch movie data from API when component mounts
     useEffect(() => {
         // Check if user is logged in, i.e., token is available
-        if (!token) return;
+        if (!token) {
+            setLoading(false);
+            return;
+        }
 
         // Set loading state to true before fetching
         setLoading(true);
@@ -101,6 +137,7 @@ export const MainView = () => {
                 {/* Content Row: flex-grow-1 makes it fill the space. align-items-center centers the content (the forms) vertically. */}
                 <Row className="align-items-center flex-grow-1">
                     <Routes>
+                        {/* SIGNUP ROUTE */}
                         <Route
                             path="/signup"
                             element={
@@ -115,6 +152,7 @@ export const MainView = () => {
                                 </>
                             }
                         />
+                        {/* LOGIN ROUTE */}
                         <Route
                             path="/login"
                             element={
@@ -129,6 +167,35 @@ export const MainView = () => {
                                 </>
                             }
                         />
+                        {/* PROFILE ROUTE */}
+                        <Route
+                            path="/profile"
+                            element={
+                                <Col md={10} className="mx-auto">
+                                    {!user ? ( 
+                                        <Navigate to="/login" replace/> 
+                                    ) : (
+                                        <ProfileView 
+                                            user={user}
+                                            token={token} 
+                                            movies={movies}
+                                            onUserUpdate={(updatedUser) => {
+                                                setUser(updatedUser);
+                                                localStorage.setItem("user", JSON.stringify(updatedUser));
+                                            }}
+                                            onLoggedOut={() => {
+                                                setUser(null); 
+                                                setToken(null); 
+                                                localStorage.clear();
+                                                setCurrentPage(1); 
+                                            }}
+                                            onToggleFavorite={handleToggleFavorite}
+                                        />
+                                    )}
+                                </Col>
+                            }
+                        />
+                        {/* MOVIE VIEW ROUTE */}
                         <Route
                             path="/movies/:movieId"
                             element={
@@ -142,12 +209,17 @@ export const MainView = () => {
                                 ) : (
                                     <Col md={8} className="mx-auto">
                                         {/* Movie view (rendered when a movie has been selected) */}
-                                        <MovieView movies={movies}   />
+                                        <MovieView 
+                                            movies={movies} 
+                                            user={user} //
+                                            onToggleFavorite={handleToggleFavorite}
+                                        />
                                     </Col>
                                 )}
                                 </>
                             }
                         />
+                        {/* MAIN VIEW ROUTE */}
                         <Route
                             path="/"
                             element={
@@ -164,7 +236,12 @@ export const MainView = () => {
                                         {moviesToShow.map((movie) => (                        
                                             <Col className="mb-5" key={movie._id} md={3}>
                                                 {/* Pass complete movie data to MovieCard component */}
-                                                <MovieCard movie={movie} />
+                                                <MovieCard 
+                                                    movie={movie}
+                                                    onToggleFavorite={handleToggleFavorite}
+                                                    // Check for favorite status using the API field: user.favorites
+                                                    isFavorite={user.favorites && user.favorites.includes(movie._id)}
+                                                />
                                             </Col>                                        
                                         ))}
                                         {/* Pagination component */}

@@ -1,0 +1,220 @@
+/* * src/components/profile-view/profile-view.jsx
+ *
+ * User Profile view
+ *
+ * (c) 2025 Dmitri Korotkov
+ */
+
+// --- Imports ---
+import { useState } from "react";
+import { Form, Button, Card, Col, Row, InputGroup } from "react-bootstrap";
+import { Eye, EyeSlash } from "react-bootstrap-icons";
+import PropTypes from "prop-types";
+import { MovieCard } from "../movie-card/movie-card"; 
+
+export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, onToggleFavorite }) => {
+    
+    // State for user update form
+    const [formData, setFormData] = useState({
+        username: user.username,
+        password: "", 
+        email: user.email,
+        birth_date: user.birth_date ? new Date(user.birth_date).toISOString().split('T')[0] : "" 
+    });
+    
+    // State for password visibility
+    const [showPassword, setShowPassword] = useState(false);
+
+    // Filter favorite movies based on the user's 'favorites' array
+    const favoriteMovies = movies.filter(m => user.favorites && user.favorites.includes(m._id));
+
+    // Handle form input changes
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    // Handle user profile update
+    const handleUpdate = (event) => {
+        event.preventDefault();
+
+        // Build a payload with ONLY the fields that have been changed
+        const dataToUpdate = {};
+        if (formData.username !== user.username) dataToUpdate.username = formData.username;
+        if (formData.password) dataToUpdate.password = formData.password; 
+        if (formData.email !== user.email) dataToUpdate.email = formData.email;
+        if (formData.birth_date && formData.birth_date !== user.birth_date) dataToUpdate.birth_date = formData.birth_date; 
+
+        if (Object.keys(dataToUpdate).length === 0) {
+            alert("No changes to update.");
+            return;
+        }
+        
+        fetch(`https://reel-movie-api-608b8b4b3a04.herokuapp.com/users/${user.username}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(dataToUpdate)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error(`Update failed: ${response.statusText}`);
+        })
+        .then(updatedUser => {
+            alert("Profile updated successfully!");
+            onUserUpdate(updatedUser); // Update state in MainView
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Update failed. Please check the console for details.");
+        });
+    };
+
+    // Handle user deregistration
+    const handleDeregister = () => {
+        if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+            return;
+        }
+
+        fetch(`https://reel-movie-api-608b8b4b3a04.herokuapp.com/users/${user.username}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Account deleted successfully.");
+                onLoggedOut(); 
+            } else {
+                throw new Error("Failed to delete account.");
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Deletion failed.");
+        });
+    };
+
+    return (
+        <Row className="gy-4">
+            {/* --- User Information Card --- */}
+            <Col md={6}>
+                <Card className="h-100">
+                    <Card.Body>
+                        <Card.Title>My Profile</Card.Title>
+                        <Card.Text>
+                            <strong>Username: </strong> {user.username} <br />
+                            <strong>Email: </strong> {user.email} <br />
+                            <strong>Birthday: </strong> {user.birth_date ? new Date(user.birth_date).toLocaleDateString() : 'Not set'}
+                        </Card.Text>
+                        <Button 
+                            variant="danger" 
+                            onClick={handleDeregister}
+                            className="mt-3"
+                        >
+                            Delete My Account
+                        </Button>
+                    </Card.Body>
+                </Card>
+            </Col>
+
+            {/* --- Update Form Card --- */}
+            <Col md={6}>
+                <Card className="h-100">
+                    <Card.Body>
+                        <Card.Title>Update Information</Card.Title>
+                        <Form onSubmit={handleUpdate}>
+                            <Form.Group className="mb-3" controlId="formUsername">
+                                <Form.Label>Username: </Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="username"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    minLength="5"
+                                />
+                            </Form.Group>
+                            
+                            {/* ... (Password, Email, Birthday Form Groups) ... */}
+                            <Form.Group className="mb-3" controlId="formPassword">
+                                <Form.Label>New Password: </Form.Label>
+                                <InputGroup>
+                                    <Form.Control
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        placeholder="Enter new password (min 8 chars)"
+                                        minLength="8"
+                                    />
+                                    <InputGroup.Text onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
+                                        {showPassword ? <EyeSlash /> : <Eye />}
+                                    </InputGroup.Text>
+                                </InputGroup>
+                                <Form.Text muted>Leave blank to keep current password.</Form.Text>
+                            </Form.Group>
+
+                            <Form.Group className="mb-3" controlId="formEmail">
+                                <Form.Label>Email: </Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3" controlId="formBirthday">
+                                <Form.Label>Birthday: </Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    name="birth_date"
+                                    value={formData.birth_date}
+                                    onChange={handleChange}
+                                />
+                            </Form.Group>
+                            <Button variant="primary" type="submit">Update</Button>
+                        </Form>
+                    </Card.Body>
+                </Card>
+            </Col>
+            
+            {/* --- Favorite Movies Section --- */}
+            <Col xs={12}>
+                <h2 className="mt-5">My Favorite Movies</h2>
+                <Row className="g-4">
+                    {favoriteMovies.length > 0 ? (
+                        favoriteMovies.map(movie => (
+                            <Col className="mb-4" key={movie._id} lg={3} md={4} sm={6}>
+                                <MovieCard
+                                    movie={movie}
+                                    onToggleFavorite={onToggleFavorite}
+                                    isFavorite={true} // Always true when rendering in this list
+                                />
+                            </Col>
+                        ))
+                    ) : (
+                        <Col>
+                            <p>You haven't added any favorite movies yet. Head back to the <a href="/">home page</a> to add some!</p>
+                        </Col>
+                    )}
+                </Row>
+            </Col>
+        </Row>
+    );
+};
+
+// Prop types validation for ProfileView
+ProfileView.propTypes = {
+    user: PropTypes.object.isRequired,
+    token: PropTypes.string.isRequired,
+    movies: PropTypes.array.isRequired,
+    onLoggedOut: PropTypes.func.isRequired,
+    onUserUpdate: PropTypes.func.isRequired,
+    onToggleFavorite: PropTypes.func.isRequired,
+};

@@ -8,7 +8,8 @@
 
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
-import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import PropTypes from "prop-types";
+import { Container, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 // --- Local application imports (none required) ---
@@ -50,5 +51,11 @@ export const NavigationBar = ({ user, onLoggedOut }) => {
             </Container>
         </Navbar>
     );
-  };
-  
+};
+
+// Prop types for validation (optional here)
+NavigationBar.propTypes = {
+    user: PropTypes.object,
+    onLoggedOut: PropTypes.func.isRequired
+};
+

@@ -122,7 +122,6 @@ export const SignupView = () => {
                         type="date"
                         value={birth_date}
                         onChange={(e) => setBirthDate(e.target.value)}
-                        required
                         autoComplete="off"
                     />
                 </Form.Group>
