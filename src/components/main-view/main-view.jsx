@@ -93,7 +93,7 @@ export const MainView = () => {
     // Render logic
     return (
         <BrowserRouter>
-            <NavigationBar user={user} onLoggedOut={() => {setUser(null); setToken(null); localStorage.clear();}} />
+            <NavigationBar user={user} onLoggedOut={() => {setUser(null); setToken(null); setCurrentPage(1); localStorage.clear();}} />
 
             {/* NEW CONTAINER: Takes up remaining vertical space (vh - Navbar height) and enables vertical centering */}
             <div className="vh-minus-navbar d-flex flex-column"> 
