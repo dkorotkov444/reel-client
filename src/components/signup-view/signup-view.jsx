@@ -12,7 +12,7 @@
 import { useState } from "react";
 import { Button, Form, InputGroup, Row, Col } from "react-bootstrap";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // --- Local application imports ---
 
@@ -25,9 +25,11 @@ export const SignupView = () => {
     const [birth_date, setBirthDate] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
+    // Initialize the navigate function
+    const navigate = useNavigate();
+
     // Function to toggle the state of password visibility
     const handleToggle = () => setShowPassword(!showPassword);
-
 
     const handleSubmit = (event) => {
         // This prevents the default behavior of the form which is to reload the entire page
@@ -48,13 +50,34 @@ export const SignupView = () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(data),})
-        .then((response) => response.json())
-        .then((/* data */) => {
-            window.location.reload(); // Reload the page to show the login view
+        .then(async(response) => {
+            if (response.ok) {  
+                // SUCCESS PATH: if the response status is 200-299 (ok)
+                return response.json();
+            }
+            // FAILURE PATH: The stream is read ONCE as plain text to catch all error types (409, 422, etc.)
+            const errorText = await response.text();
+            // The server often sends "Error: [message]". This cleans it up.
+            const cleanedErrorText = errorText.startsWith("Error: ") 
+                ? errorText.substring(7).trim() 
+                : errorText;
+            // Throw an error using the detailed text from the server
+            throw new Error(cleanedErrorText || response.statusText);
         })
-        .catch((error) => {
-            console.error("Signup error: ", error);
-            alert("An error occurred during signup");
+        .then(user => {
+            // Success: User object received
+            if (user) {
+                alert("Signup successful! You will be redirected to log in.");
+                navigate("/login"); 
+            }
+        })
+        .catch(error => {
+            console.error("An error occurred during signup: ", error);
+            // Optional: clean the error message one last time for the alert, then display
+            const displayMessage = error.message.startsWith("Error: ")
+                ? error.message.substring(7).trim()
+                : error.message;
+            alert(`Signup failed: ${displayMessage}`);
         });
     };
 
@@ -108,7 +131,7 @@ export const SignupView = () => {
                 <Form.Group controlId="formEmail">
                     <Form.Label>Email: </Form.Label>
                     <Form.Control
-                        type="text"
+                        type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required

@@ -1,5 +1,6 @@
 /*  
  * src/components/main-view/main-view.jsx
+ *
  * Main View file of the REEL movie API client
  *
  * (c) 2025 Dmitri Korotkov
@@ -241,6 +242,7 @@ export const MainView = () => {
                                                     onToggleFavorite={handleToggleFavorite}
                                                     // Check for favorite status using the API field: user.favorites
                                                     isFavorite={user.favorites && user.favorites.includes(movie._id)}
+                                                    navState={{ from: "/" }}    // Pass the navState for the home page
                                                 />
                                             </Col>                                        
                                         ))}

@@ -1,15 +1,22 @@
-/* * src/components/profile-view/profile-view.jsx
+/* 
+ * src/components/profile-view/profile-view.jsx
  *
  * User Profile view
+ * 
+ * Favorite movies are rendered with a React Bootstrap carousel.
  *
  * (c) 2025 Dmitri Korotkov
  */
 
-// --- Imports ---
+// --- Core Node.js modules (none used here) ---
+// --- React and other Third-party libraries ---
 import { useState } from "react";
-import { Form, Button, Card, Col, Row, InputGroup } from "react-bootstrap";
+import { Form, Button, Card, Carousel, Col, Row, InputGroup } from "react-bootstrap";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
+
+// --- Local application imports ---
 import { MovieCard } from "../movie-card/movie-card"; 
 
 export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, onToggleFavorite }) => {
@@ -28,6 +35,19 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
     // Filter favorite movies based on the user's 'favorites' array
     const favoriteMovies = movies.filter(m => user.favorites && user.favorites.includes(m._id));
 
+    // Function to chunk the array for the carousel
+    const chunkArray = (arr, size) => {
+        const chunkedArr = [];
+        for (let i = 0; i < arr.length; i += size) {
+            chunkedArr.push(arr.slice(i, i + size));
+        }
+        return chunkedArr;
+    };
+
+    // Chunk the favorite movies into slides (e.g., 4 movies per slide)
+    const moviesPerSlide = 4; 
+    const movieSlides = chunkArray(favoriteMovies, moviesPerSlide);
+
     // Handle form input changes
     const handleChange = (e) => {
         setFormData({
@@ -42,11 +62,19 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
 
         // Build a payload with ONLY the fields that have been changed
         const dataToUpdate = {};
-        if (formData.username !== user.username) dataToUpdate.username = formData.username;
-        if (formData.password) dataToUpdate.password = formData.password; 
-        if (formData.email !== user.email) dataToUpdate.email = formData.email;
-        if (formData.birth_date && formData.birth_date !== user.birth_date) dataToUpdate.birth_date = formData.birth_date; 
+        // Prepare the trimmed stored date for comparison with formData.birth_date (YYYY-MM-DD)
+        const trimmedUserBirthDate = user.birth_date 
+            ? new Date(user.birth_date).toISOString().split('T')[0] 
+            : "";
 
+        if (formData.username !== user.username) dataToUpdate.newUsername = formData.username;
+        if (formData.password) dataToUpdate.newPassword = formData.password; 
+        if (formData.email !== user.email) dataToUpdate.newEmail = formData.email;
+        if (formData.birth_date && formData.birth_date !== trimmedUserBirthDate) {
+            dataToUpdate.newBirthDate = formData.birth_date;
+        } 
+
+        // If no fields have changed, alert the user and return
         if (Object.keys(dataToUpdate).length === 0) {
             alert("No changes to update.");
             return;
@@ -60,19 +88,41 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
             },
             body: JSON.stringify(dataToUpdate)
         })
-        .then(response => {
-            if (response.ok) {
+        .then(async(response) => {
+            if (response.ok) {  
+                //SUCCESS PATH: if the response status is 200-299 (ok)
                 return response.json();
             }
-            throw new Error(`Update failed: ${response.statusText}`);
+            //FAILURE PATH: The stream is read ONCE as plain text to catch all error types (409, 422, 500 crashes).
+            const errorText = await response.text();
+            // Clean the error message text from the server's "Error: " prefix
+            const cleanedErrorText = errorText.startsWith("Error: ") 
+                ? errorText.substring(7).trim() // Removes "Error: "
+                : errorText;
+            // Throw an error using the detailed text from the server
+            throw new Error(cleanedErrorText || response.statusText);
         })
         .then(updatedUser => {
             alert("Profile updated successfully!");
             onUserUpdate(updatedUser); // Update state in MainView
         })
         .catch(error => {
-            console.error(error);
-            alert("Update failed. Please check the console for details.");
+
+            console.error("Profile update error: ", error);
+            // Optional: ensure the alert is clean in case the server message changes
+            const displayMessage = error.message.startsWith("Error: ")
+                ? error.message.substring(7).trim()
+                : error.message;
+            alert(`Update failed: ${displayMessage}`);
+
+            // Reset the form state back to the PROPS (last known good state)
+            // This forces a clean re-render with the valid user data, preventing the crash.
+            setFormData({
+                username: user.username, 
+                password: "", // Always clear the password field after any attempt
+                email: user.email,
+                birth_date: user.birth_date ? new Date(user.birth_date).toISOString().split('T')[0] : "" 
+            });
         });
     };
 
@@ -110,14 +160,14 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                         <Card.Text>
                             <strong>Username: </strong> {user.username} <br />
                             <strong>Email: </strong> {user.email} <br />
-                            <strong>Birthday: </strong> {user.birth_date ? new Date(user.birth_date).toLocaleDateString() : 'Not set'}
+                            <strong>Birthday: </strong> {user.birth_date ? new Date(user.birth_date).toLocaleDateString('en-GB') : 'Not set'}
                         </Card.Text>
                         <Button 
                             variant="danger" 
                             onClick={handleDeregister}
                             className="mt-3"
                         >
-                            Delete My Account
+                            Remove account permanently
                         </Button>
                     </Card.Body>
                 </Card>
@@ -129,6 +179,7 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                     <Card.Body>
                         <Card.Title>Update Information</Card.Title>
                         <Form onSubmit={handleUpdate}>
+
                             <Form.Group className="mb-3" controlId="formUsername">
                                 <Form.Label>Username: </Form.Label>
                                 <Form.Control
@@ -140,7 +191,6 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                                 />
                             </Form.Group>
                             
-                            {/* ... (Password, Email, Birthday Form Groups) ... */}
                             <Form.Group className="mb-3" controlId="formPassword">
                                 <Form.Label>New Password: </Form.Label>
                                 <InputGroup>
@@ -151,6 +201,7 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                                         onChange={handleChange}
                                         placeholder="Enter new password (min 8 chars)"
                                         minLength="8"
+                                        autoComplete="new-password"
                                     />
                                     <InputGroup.Text onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
                                         {showPassword ? <EyeSlash /> : <Eye />}
@@ -178,6 +229,7 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                                     onChange={handleChange}
                                 />
                             </Form.Group>
+
                             <Button variant="primary" type="submit">Update</Button>
                         </Form>
                     </Card.Body>
@@ -189,18 +241,33 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                 <h2 className="mt-5">My Favorite Movies</h2>
                 <Row className="g-4">
                     {favoriteMovies.length > 0 ? (
-                        favoriteMovies.map(movie => (
-                            <Col className="mb-4" key={movie._id} lg={3} md={4} sm={6}>
-                                <MovieCard
-                                    movie={movie}
-                                    onToggleFavorite={onToggleFavorite}
-                                    isFavorite={true} // Always true when rendering in this list
-                                />
-                            </Col>
-                        ))
+                        <Carousel 
+                            interval={null}     // Optional: set to null to disable auto-slide
+                            indicators={true}   // Optional: display slide indicators
+                            className="w-100 carousel-dark"   // Ensure it uses full width of the column
+                        >
+                            {/* Iterate over the movie slides (chunks) */}
+                            {movieSlides.map((slide, slideIndex) => (
+                                <Carousel.Item key={slideIndex}>
+                                    {/* Use Row/Col inside Carousel.Item to display the cards */}
+                                    <Row className="g-4 pb-5 justify-content-center"> {/* Add pb-5 for indicator space */}
+                                        {slide.map(movie => (
+                                            <Col className="mb-4" key={movie._id} lg={3} md={4} sm={6}>
+                                                <MovieCard
+                                                    movie={movie}
+                                                    onToggleFavorite={onToggleFavorite}
+                                                    isFavorite={true}
+                                                    navState={{ from: "/profile" }}
+                                                />
+                                            </Col>
+                                        ))}
+                                    </Row>
+                                </Carousel.Item>
+                            ))}
+                        </Carousel>
                     ) : (
                         <Col>
-                            <p>You haven't added any favorite movies yet. Head back to the <a href="/">home page</a> to add some!</p>
+                            <p>You haven't added any favorite movies yet. Head back to the <Link to="/">home page</Link> to add some!</p>
                         </Col>
                     )}
                 </Row>

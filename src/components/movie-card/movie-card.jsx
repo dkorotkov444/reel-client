@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 // --- Local application imports (none required) ---
 
 // Movie card component
-export const MovieCard = ({ movie, onToggleFavorite, isFavorite }) => {
+export const MovieCard = ({ movie, onToggleFavorite, isFavorite, navState }) => {
     const { title, description, image_url, genre } = movie;
     return (
         <Card className="h-100">
@@ -34,7 +34,7 @@ export const MovieCard = ({ movie, onToggleFavorite, isFavorite }) => {
                         padding: 0, 
                         lineHeight: 1 
                     }}
-                    className="text-danger bg-light rounded-circle border border-secondary" 
+                    className="text-danger bg-light rounded-circle" 
                 >
                     {/* Conditional Icon Rendering */}
                     {isFavorite ? <HeartFill /> : <Heart />}
@@ -46,7 +46,10 @@ export const MovieCard = ({ movie, onToggleFavorite, isFavorite }) => {
                 <Card.Title>{title}</Card.Title>
                 <Card.Text className="description-clamp">{description}</Card.Text>
                 <Card.Text className="text-end">{genre.name}</Card.Text>
-                <Link to={`/movies/${encodeURIComponent(movie._id)}`}>
+                <Link 
+                    to={`/movies/${encodeURIComponent(movie._id)}`} 
+                    state={navState}
+                >
                     <Button variant="link">Open</Button>
                 </Link>
             </Card.Body>
@@ -78,5 +81,6 @@ MovieCard.propTypes = {
     }).isRequired,
     onToggleFavorite: PropTypes.func,
     isFavorite: PropTypes.bool,
+    navState: PropTypes.object,
     // onMovieClick: PropTypes.func.isRequired  // If I decide to click on card instead of link
 }; 

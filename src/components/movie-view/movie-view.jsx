@@ -10,7 +10,7 @@ import PropTypes from "prop-types";
 import { Button, Card, CardImg } from "react-bootstrap";
 import { Heart, HeartFill } from "react-bootstrap-icons";
 import { useParams } from "react-router";
-import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // --- Local application imports (none required) ---
 
@@ -20,6 +20,18 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
     const movie = movies.find(m => m._id === movieId);
     // Determine favorite status
     const isFavorite = user.favorites && user.favorites.includes(movie._id);
+
+    // Hooks for navigation
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Determine the 'back' path from the location state, default to home
+    const backPath = location.state?.from || "/"; 
+
+    // Handle back button click
+    const handleBackClick = () => {
+        navigate(backPath);     // Use the navigate function to go to the determined path
+    };
 
     return (
     <>
@@ -40,7 +52,7 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
                         padding: 0, 
                         lineHeight: 1 
                     }}
-                    className="text-danger bg-light rounded-circle border border-secondary" 
+                    className="text-danger bg-light rounded-circle" 
                 >
                     {/* Conditional Icon Rendering */}
                     {isFavorite ? <HeartFill /> : <Heart />}
@@ -57,9 +69,13 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
             </Card.Body>
         </Card>
 
-        <Link to={"/"}>
-            <Button variant="back-button">Back</Button>
-        </Link>
+        {/*  Button with an onClick handler instead of Link to handle navigation to different original locations */}
+        <Button 
+            variant="back-button"
+            onClick={handleBackClick}
+        >
+            Back
+        </Button>
     </>
     );
   };
