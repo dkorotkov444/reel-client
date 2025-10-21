@@ -4,7 +4,8 @@
   "description": "REEL Movie App frontend",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel src/index.html --port 1234"
+    "start": "parcel src/index.html --port 1234",
+    "build": "parcel build src/index.html --public-url /"
   },
   "repository": {
     "type": "git",
