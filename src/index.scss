@@ -2,9 +2,6 @@
 
 //@import '~bootstrap/scss/bootstrap.scss';
 
-//$color: darkblue;
-//.reel { color: $color; }
-
 /* Enforces multi-line clamping for the movie description */
 .description-clamp {
     /* Standard properties for text clipping */
@@ -34,3 +31,4 @@
 .vh-minus-navbar {
     height: calc(100vh - 70px);
 }
+

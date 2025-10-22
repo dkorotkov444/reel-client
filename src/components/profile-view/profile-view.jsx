@@ -12,7 +12,6 @@
 // --- React and other Third-party libraries ---
 import { useState } from "react";
 import { Form, Button, Card, Carousel, Col, Row, InputGroup } from "react-bootstrap";
-import { ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
 import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -244,8 +243,6 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                             interval={null}     // Optional: set to null to disable auto-slide
                             indicators={true}   // Optional: display slide indicators
                             className="w-100 carousel-dark"   // Ensure it uses full width of the column
-                            prevIcon={<ChevronLeft size={20} className="text-dark" />} 
-                            nextIcon={<ChevronRight size={20} className="text-dark" />} 
                         >
                             {/* Iterate over the movie slides (chunks) */}
                             {movieSlides.map((slide, slideIndex) => (
