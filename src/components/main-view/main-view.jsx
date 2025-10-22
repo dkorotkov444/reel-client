@@ -25,8 +25,8 @@ import { ProfileView } from "../profile-view/profile-view";
 export const MainView = () => {
     // --- State variables ---
     // Initialize user and token state from local storage if available
-    const storedUser = null;
-    const storedToken = null;
+    let storedUser = null;
+    let storedToken = null;
     try {
         storedUser = JSON.parse(localStorage.getItem("user"));
         storedToken = localStorage.getItem("token");
@@ -230,7 +230,7 @@ export const MainView = () => {
                                 ) : (movies.length === 0) ? (   // If not loading, check if movies array is empty
                                     <Col>The movie list is empty!</Col>
                                 ) : (
-                                    <Col md={8} className="mx-auto">
+                                    <Col xs={12}>
                                         {/* Movie view (rendered when a movie has been selected) */}
                                         <MovieView 
                                             movies={movies} 

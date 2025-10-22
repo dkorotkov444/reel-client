@@ -12,6 +12,7 @@ import { Heart, HeartFill } from "react-bootstrap-icons";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 
 // --- Local application imports (none required) ---
+import { MovieCard } from "../movie-card/movie-card";
 
 // Movie view component
 export const MovieView = ({ movies, user, onToggleFavorite }) => {
@@ -69,7 +70,7 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
 
                     <Row className="g-0 h-100 align-items-center">
                         {/* Left upper quarter: text */}
-                        <Col md={6} className="p-4">
+                        <Col md={6} className="p-4 pe-md-5">
                             <Card.Body className="p-0 h-100 d-flex flex-column">
                                 <div>
                                     <Card.Title className="mb-2">{movie.title}</Card.Title>
@@ -82,47 +83,33 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
 
                                 <div className="mb-2"><Card.Text>{movie.description}</Card.Text></div>
 
-                                <div className="mt-auto">
+                                <div>
                                     <Card.Text className="mb-1"><strong>Release year:</strong> {movie.release_year}</Card.Text>
-                                    <Card.Text className="mb-0"><strong>IMDB Rating:</strong> {movie.rating_imdb ?? 'N/A'}</Card.Text>
+                                    <Card.Text className="mb-0"><strong>IMDb Rating:</strong> {movie.rating_imdb ?? 'N/A'}</Card.Text>
                                 </div>
+
+                                {/* Back button was here; moved back below the card */}
                             </Card.Body>
                         </Col>
 
                         {/* Right upper quarter: poster (centered) */}
-                        <Col md={6} className="d-flex align-items-center justify-content-center p-3">
+                        <Col md={6} className="d-flex align-items-center justify-content-center p-3 ps-md-5">
                             <img src={movie.image_url} alt={`${movie.title} poster`} className="img-fluid" style={{ maxHeight: '40vh', objectFit: 'contain' }} />
                         </Col>
                     </Row>
                 </Card>
             </div>
 
-            {/* Lower half: similar movies carousel */}
-            <div style={{ height: '50vh' }}>
-                <h5>Similar movies</h5>
-                {similarMovies.length === 0 ? (
-                    <p>No similar movies found.</p>
-                ) : (
-                    <Carousel interval={null} indicators={true} className="carousel-dark">
-                        {similarSlides.map((slide, idx) => (
-                            <Carousel.Item key={idx}>
-                                <Row className="g-4 justify-content-center py-4">
-                                    {slide.map(sm => (
-                                        <Col key={sm._id} lg={3} md={4} sm={6} className="mb-4">
-                                            <MovieCard
-                                                movie={sm}
-                                                onToggleFavorite={onToggleFavorite}
-                                                isFavorite={user.favorites && user.favorites.includes(sm._id)}
-                                                navState={{ from: `/movies/${movie._id}` }}
-                                            />
-                                        </Col>
-                                    ))}
-                                </Row>
-                            </Carousel.Item>
-                        ))}
-                    </Carousel>
-                )}
+            {/* Back link */}
+            <div className="mb-3">
+                <Button as={Link} to={backPath} variant="secondary">Back</Button>
             </div>
+
+            {/**
+             * Lower half: similar movies carousel
+             * Temporarily commented out while debugging layout/errors.
+             * To restore: uncomment this block.
+             */}
         </div>
     );
 };
