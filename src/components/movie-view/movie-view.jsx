@@ -36,8 +36,15 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
     // Determine favorite status
     const isFavorite = user.favorites && user.favorites.includes(movie._id);
 
-    // Similar movies by genre
-    const similarMovies = movies.filter(m => m._id !== movie._id && m.genre && movie.genre && m.genre.name === movie.genre.name);
+    // Similar movies by genre (robust, case-insensitive match)
+    const currentGenreName = movie.genre && movie.genre.name ? String(movie.genre.name).trim().toLowerCase() : null;
+    const similarMovies = currentGenreName
+        ? movies.filter(m => {
+            if (!m.genre || !m.genre.name) return false;
+            if (m._id === movie._id) return false;
+            return String(m.genre.name).trim().toLowerCase() === currentGenreName;
+        })
+        : [];
 
     // Helper to chunk an array into slides
     const chunkArray = (arr, size) => {
@@ -105,11 +112,32 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
                 <Button as={Link} to={backPath} variant="secondary">Back</Button>
             </div>
 
-            {/**
-             * Lower half: similar movies carousel
-             * Temporarily commented out while debugging layout/errors.
-             * To restore: uncomment this block.
-             */}
+            {/* Lower half: similar movies carousel */}
+            <div style={{ height: '50vh' }}>
+                <h5>Similar movies</h5>
+                {similarMovies.length === 0 ? (
+                    <p>No similar movies found.</p>
+                ) : (
+                    <Carousel interval={null} indicators={true} className="carousel-dark">
+                        {similarSlides.map((slide, idx) => (
+                            <Carousel.Item key={idx}>
+                                <Row className="g-4 justify-content-center py-4">
+                                    {slide.map(sm => (
+                                        <Col key={sm._id} lg={3} md={4} sm={6} className="mb-4">
+                                            <MovieCard
+                                                movie={sm}
+                                                onToggleFavorite={onToggleFavorite}
+                                                isFavorite={user.favorites && user.favorites.includes(sm._id)}
+                                                navState={{ from: `/movies/${movie._id}` }}
+                                            />
+                                        </Col>
+                                    ))}
+                                </Row>
+                            </Carousel.Item>
+                        ))}
+                    </Carousel>
+                )}
+            </div>
         </div>
     );
 };
