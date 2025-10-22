@@ -7,78 +7,125 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import PropTypes from "prop-types";
-import { Button, Card, CardImg } from "react-bootstrap";
+import { Button, Card, CardImg, Carousel, Row, Col } from "react-bootstrap";
 import { Heart, HeartFill } from "react-bootstrap-icons";
-import { useParams } from "react-router";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 
 // --- Local application imports (none required) ---
 
 // Movie view component
 export const MovieView = ({ movies, user, onToggleFavorite }) => {
     const { movieId } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const backPath = location.state?.from || "/";
+
     const movie = movies.find(m => m._id === movieId);
+
+    // Guard when movie isn't found
+    if (!movie) {
+        return (
+            <div>
+                <p>Movie not found.</p>
+                <Button as={Link} to={backPath} variant="secondary">Back</Button>
+            </div>
+        );
+    }
+
     // Determine favorite status
     const isFavorite = user.favorites && user.favorites.includes(movie._id);
 
-    // Hooks for navigation
-    const location = useLocation();
-    const navigate = useNavigate();
+    // Similar movies by genre
+    const similarMovies = movies.filter(m => m._id !== movie._id && m.genre && movie.genre && m.genre.name === movie.genre.name);
 
-    // Determine the 'back' path from the location state, default to home
-    const backPath = location.state?.from || "/"; 
-
-    // Handle back button click
-    const handleBackClick = () => {
-        navigate(backPath);     // Use the navigate function to go to the determined path
+    // Helper to chunk an array into slides
+    const chunkArray = (arr, size) => {
+        const chunked = [];
+        for (let i = 0; i < arr.length; i += size) chunked.push(arr.slice(i, i + size));
+        return chunked;
     };
 
+    const moviesPerSlide = 4;
+    const similarSlides = chunkArray(similarMovies, moviesPerSlide);
+
     return (
-    <>
-        <Card>
+        <div>
+            {/* Upper half: details (left) + poster (right) */}
+            <div style={{ height: '50vh' }} className="mb-4">
+                <Card className="h-100">
+                    {/* Favorite button overlay */}
+                    {onToggleFavorite && (
+                        <Button
+                            variant="link"
+                            onClick={() => onToggleFavorite(movie._id, !isFavorite)}
+                            aria-pressed={isFavorite}
+                            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                            className="text-danger bg-light rounded-circle"
+                            style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 2, fontSize: '1.75rem', padding: 0, lineHeight: 1 }}
+                        >
+                            {isFavorite ? <HeartFill /> : <Heart />}
+                        </Button>
+                    )}
 
-            {/* FAVORITE button -  conditional button overlay */}
-            {onToggleFavorite && (
-                <Button 
-                    variant="link" 
-                    // Call handler, passing the movie ID and the action (true for adding, false for removing)
-                    onClick={() => onToggleFavorite(movie._id, !isFavorite)}
-                    style={{ 
-                        position: 'absolute', 
-                        top: '10px', 
-                        right: '10px', 
-                        zIndex: 1, 
-                        fontSize: '1.75rem', 
-                        padding: 0, 
-                        lineHeight: 1 
-                    }}
-                    className="text-danger bg-light rounded-circle" 
-                >
-                    {/* Conditional Icon Rendering */}
-                    {isFavorite ? <HeartFill /> : <Heart />}
-                </Button>
-            )}
+                    <Row className="g-0 h-100 align-items-center">
+                        {/* Left upper quarter: text */}
+                        <Col md={6} className="p-4">
+                            <Card.Body className="p-0 h-100 d-flex flex-column">
+                                <div>
+                                    <Card.Title className="mb-2">{movie.title}</Card.Title>
+                                </div>
 
-            <CardImg src={movie.image_url} className="w-50 mx-auto d-block" alt={`${movie.title} poster`} />
-            <Card.Body>
-                <Card.Title>{movie.title}</Card.Title>
-                <Card.Text>Plot: {movie.description}</Card.Text>
-                <Card.Text>Director: {movie.director.name}</Card.Text>
-                <Card.Text>Genre: {movie.genre.name}</Card.Text>
-                <Card.Text>Release year: {movie.release_year}</Card.Text>
-            </Card.Body>
-        </Card>
+                                <div className="d-flex justify-content-between mb-2">
+                                    <div className="text-start"><strong>Director:</strong> {movie.director?.name}</div>
+                                    <div className="text-end"><strong>Genre:</strong> {movie.genre?.name}</div>
+                                </div>
 
-        {/*  Button with an onClick handler instead of Link to handle navigation to different original locations */}
-        <Button 
-            variant="back-button"
-            onClick={handleBackClick}
-        >
-            Back
-        </Button>
-    </>
+                                <div className="mb-2"><Card.Text>{movie.description}</Card.Text></div>
+
+                                <div className="mt-auto">
+                                    <Card.Text className="mb-1"><strong>Release year:</strong> {movie.release_year}</Card.Text>
+                                    <Card.Text className="mb-0"><strong>IMDB Rating:</strong> {movie.rating_imdb ?? 'N/A'}</Card.Text>
+                                </div>
+                            </Card.Body>
+                        </Col>
+
+                        {/* Right upper quarter: poster (centered) */}
+                        <Col md={6} className="d-flex align-items-center justify-content-center p-3">
+                            <img src={movie.image_url} alt={`${movie.title} poster`} className="img-fluid" style={{ maxHeight: '40vh', objectFit: 'contain' }} />
+                        </Col>
+                    </Row>
+                </Card>
+            </div>
+
+            {/* Lower half: similar movies carousel */}
+            <div style={{ height: '50vh' }}>
+                <h5>Similar movies</h5>
+                {similarMovies.length === 0 ? (
+                    <p>No similar movies found.</p>
+                ) : (
+                    <Carousel interval={null} indicators={true} className="carousel-dark">
+                        {similarSlides.map((slide, idx) => (
+                            <Carousel.Item key={idx}>
+                                <Row className="g-4 justify-content-center py-4">
+                                    {slide.map(sm => (
+                                        <Col key={sm._id} lg={3} md={4} sm={6} className="mb-4">
+                                            <MovieCard
+                                                movie={sm}
+                                                onToggleFavorite={onToggleFavorite}
+                                                isFavorite={user.favorites && user.favorites.includes(sm._id)}
+                                                navState={{ from: `/movies/${movie._id}` }}
+                                            />
+                                        </Col>
+                                    ))}
+                                </Row>
+                            </Carousel.Item>
+                        ))}
+                    </Carousel>
+                )}
+            </div>
+        </div>
     );
-  };
+};
 
 // Prop types validation
 MovieView.propTypes = {

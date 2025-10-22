@@ -32,3 +32,34 @@
     height: calc(100vh - 70px);
 }
 
+/* Minimal, scoped rules to place carousel controls just outside the slide */
+.favorites-carousel {
+    position: relative; /* positioning context for absolute controls */
+    overflow: visible; /* allow controls to sit outside without being clipped */
+}
+
+.favorites-carousel .carousel-control-prev,
+.favorites-carousel .carousel-control-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.25rem;
+    height: 2.25rem;
+    opacity: 0.95;
+    z-index: 5;
+    background: transparent; /* preserve default icon visuals */
+}
+
+.favorites-carousel .carousel-control-prev { left: -1.25rem; }
+.favorites-carousel .carousel-control-next { right: -1.25rem; }
+
+/* On narrow screens keep controls inside to avoid clipping or overlap */
+@media (max-width: 768px) {
+    .favorites-carousel .carousel-control-prev { left: 0.25rem; }
+    .favorites-carousel .carousel-control-next { right: 0.25rem; }
+    .favorites-carousel .carousel-control-prev,
+    .favorites-carousel .carousel-control-next { width: 2rem; height: 2rem; }
+}
+
+
+

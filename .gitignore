@@ -25,3 +25,5 @@ yarn-error.log*
 # Test coverage
 coverage/
 .nyc_output/
+
+BASELINE.md

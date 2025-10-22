@@ -242,7 +242,7 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                         <Carousel 
                             interval={null}     // Optional: set to null to disable auto-slide
                             indicators={true}   // Optional: display slide indicators
-                            className="w-100 carousel-dark"   // Ensure it uses full width of the column
+                            className="w-100 carousel-dark favorites-carousel"   // Scoped class for custom control placement
                         >
                             {/* Iterate over the movie slides (chunks) */}
                             {movieSlides.map((slide, slideIndex) => (
