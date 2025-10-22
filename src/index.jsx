@@ -15,9 +15,6 @@ import { MainView } from "./components/main-view/main-view";
 // Import stylesheet
 import "./index.scss";
 
-// Clear local storage on app start
-localStorage.clear(); 
-
 // Main component (will eventually use all the others)
 const ReelApplication = () => {
     return (

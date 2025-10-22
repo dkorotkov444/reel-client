@@ -86,13 +86,17 @@ export const SignupView = () => {
         <>
             {/* Welcome heading */}
             <Row className="justify-content-center mb-4">
-                {/* The Col is set to center the text and take up the full width (12) on all screen sizes */}
-                <Col xs={12} className="text-center"> 
-                    <h1 className="display-8 mb-0">
+                <Col xs={12} className="text-start"> 
+                    <h1 className="display-8 mb-0 text-start">
                         Welcome to
                     </h1>
-                    <h1 className="display-1 fw-bold" style={{ lineHeight: '1.2' }}>
+                </Col>
+                <Col xs={12} className="text-end"> 
+                    <h1 className="display-1 fw-bold mb-0 text-end" style={{ lineHeight: '1.2' }}>
                         REEL
+                    </h1>
+                    <h1 className="display-6 mb-0 text-end">
+                        Your movies app
                     </h1>
                 </Col>
             </Row>

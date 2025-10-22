@@ -18,7 +18,7 @@ export const NavigationBar = ({ user, onLoggedOut }) => {
     return (
         <Navbar expand="lg" className="bg-body-tertiary align-items-end">
             <Container>
-                <Navbar.Brand href="/">REEL Movie Application</Navbar.Brand>
+                <Navbar.Brand href="/">REEL Movies Application</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
 

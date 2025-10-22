@@ -25,8 +25,15 @@ import { ProfileView } from "../profile-view/profile-view";
 export const MainView = () => {
     // --- State variables ---
     // Initialize user and token state from local storage if available
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const storedToken = localStorage.getItem("token");
+    const storedUser = null;
+    const storedToken = null;
+    try {
+        storedUser = JSON.parse(localStorage.getItem("user"));
+        storedToken = localStorage.getItem("token");
+    } catch (e) {
+        // Corrupted localStorage: clear and force login
+        localStorage.clear();
+    }
     // If no user or token in local storage, initialize as null
     const [user, setUser] = useState(storedUser ? storedUser : null);
     const [token, setToken] = useState(storedToken ? storedToken : null);
@@ -35,8 +42,9 @@ export const MainView = () => {
     const [loading, setLoading] = useState(true);             // Movie loading state
     const [currentPage, setCurrentPage] = useState(1);        // Pagination state to hold the current page number (start on page 1)
 
-    // Boolean constant for Footer visibility - only show Footer when user is logged in and movie posters are on screen
-    const showFooter = user && (!loading || movies.length > 0);
+    // Boolean constants for visibility
+    const showFooter = user && (!loading || movies.length > 0); // Only show Footer when user is logged in and movie posters are on screen
+    const showNavbar = !!user;                                  // Only show Navbar when user is logged in
 
     // Constants for pagination
     const itemsPerPage = 8;
@@ -62,6 +70,15 @@ export const MainView = () => {
             headers: { Authorization: `Bearer ${token}` }
         })
         .then(response => {
+            if (response.status === 401 || response.status === 403) {
+                // Unauthorized: clear localStorage and force login
+                localStorage.clear();
+                setUser(null);
+                setToken(null);
+                setCurrentPage(1);
+                alert("Session expired or unauthorized. Please log in again.");
+                throw new Error("Unauthorized");
+            }
             if (!response.ok) {
                 throw new Error("Could not update favorites.");
             }
@@ -75,7 +92,10 @@ export const MainView = () => {
         })
         .catch(error => {
             console.error("Favorite toggle error:", error);
-            alert("Failed to update favorites.");
+            // Only alert if not already handled above
+            if (error.message !== "Unauthorized") {
+                alert("Failed to update favorites.");
+            }
         });
     };
 
@@ -130,7 +150,8 @@ export const MainView = () => {
     // Render logic
     return (
         <BrowserRouter>
-            <NavigationBar user={user} onLoggedOut={() => {setUser(null); setToken(null); setCurrentPage(1); localStorage.clear();}} />
+            {/* Render NavigationBar based on user login status */}
+            {showNavbar && <NavigationBar user={user} onLoggedOut={() => {localStorage.clear(); setUser(null); setToken(null); setCurrentPage(1);}} />}
 
             {/* NEW CONTAINER: Takes up remaining vertical space (vh - Navbar height) and enables vertical centering */}
             <div className="vh-minus-navbar d-flex flex-column"> 
@@ -181,9 +202,10 @@ export const MainView = () => {
                                             token={token} 
                                             movies={movies}
                                             onUserUpdate={(updatedUser) => {
-                                                setUser(updatedUser);
-                                                localStorage.setItem("user", JSON.stringify(updatedUser));
-                                            }}
+                                                   // For sensitive changes (username/password) backend revokes token and frontend forces logout.
+                                                   setUser(updatedUser);
+                                                   localStorage.setItem("user", JSON.stringify(updatedUser));
+                                               }}
                                             onLoggedOut={() => {
                                                 setUser(null); 
                                                 setToken(null); 

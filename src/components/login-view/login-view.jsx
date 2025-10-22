@@ -8,8 +8,8 @@
 
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
-import { useState } from "react";
-import {Button, Form, InputGroup, Row, Col } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import {Button, Form, InputGroup, Row, Col, Alert } from "react-bootstrap";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 
@@ -24,6 +24,16 @@ export const LoginView = ({ onLoggedIn }) => {
 
     // Function to toggle the state of password visibility
     const handleToggle = () => setShowPassword(!showPassword);
+
+    // Optional logout message propagated via sessionStorage (cleared after display)
+    const [logoutMessage, setLogoutMessage] = useState(null);
+    useEffect(() => {
+        const msg = sessionStorage.getItem('logoutMessage');
+        if (msg) {
+            setLogoutMessage(msg);
+            sessionStorage.removeItem('logoutMessage');
+        }
+    }, []);
 
     const handleSubmit = (event) => {
         // This prevents the default behavior of the form which is to reload the entire page
@@ -60,15 +70,29 @@ export const LoginView = ({ onLoggedIn }) => {
     // Rendering the login form
     return (
         <>
+            {logoutMessage && (
+                <Row className="mb-3">
+                    <Col>
+                        <Alert variant="warning" onClose={() => setLogoutMessage(null)} dismissible>
+                            {logoutMessage}
+                        </Alert>
+                    </Col>
+                </Row>
+            )}
             {/* Welcome heading */}
             <Row className="justify-content-center mb-4">
                 {/* The Col is set to center the text and take up the full width (12) on all screen sizes */}
-                <Col xs={12} className="text-center"> 
-                    <h1 className="display-8 mb-0">
-                        Welcome to
-                    </h1>
-                    <h1 className="display-1 fw-bold" style={{ lineHeight: '1.2' }}>
+                <Col xs={12} className="text-start"> 
+                <h1 className="display-8 mb-0 text-start">
+                    Welcome to
+                </h1>
+                </Col>
+                <Col xs={12} className="text-end"> 
+                    <h1 className="display-1 fw-bold mb-0 text-end" style={{ lineHeight: '1.2' }}>
                         REEL
+                    </h1>
+                    <h1 className="display-6 mb-0 text-end">
+                        Your movies app
                     </h1>
                 </Col>
             </Row>

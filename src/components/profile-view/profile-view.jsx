@@ -103,11 +103,30 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
             throw new Error(cleanedErrorText || response.statusText);
         })
         .then(updatedUser => {
+            /*
+             * Security policy:
+             * - Non-sensitive updates (email, birth_date) return updated user and keep the session.
+             * - Sensitive updates (username, password) revoke the current JWT on the backend and force logout in frontend.
+             */
+            if (dataToUpdate.newPassword || dataToUpdate.newUsername) {
+                alert("Username/password changed. You'll be logged out for security.");
+                // Clear session in parent (MainView will redirect to /login)
+                onLoggedOut();
+                return;
+            }
+
+            // Non-sensitive updates: update parent state and refresh local form
             alert("Profile updated successfully!");
             onUserUpdate(updatedUser); // Update state in MainView
+            // Refresh local form state from the returned user object
+            setFormData({
+                username: updatedUser.username,
+                password: "",
+                email: updatedUser.email,
+                birth_date: updatedUser.birth_date ? new Date(updatedUser.birth_date).toISOString().split('T')[0] : ""
+            });
         })
         .catch(error => {
-
             console.error("Profile update error: ", error);
             // Optional: ensure the alert is clean in case the server message changes
             const displayMessage = error.message.startsWith("Error: ")
@@ -152,34 +171,12 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
 
     return (
         <Row className="gy-4">
-            {/* --- User Information Card --- */}
-            <Col md={6}>
-                <Card className="h-100">
-                    <Card.Body>
-                        <Card.Title>My Profile</Card.Title>
-                        <Card.Text>
-                            <strong>Username: </strong> {user.username} <br />
-                            <strong>Email: </strong> {user.email} <br />
-                            <strong>Birthday: </strong> {user.birth_date ? new Date(user.birth_date).toLocaleDateString('en-GB') : 'Not set'}
-                        </Card.Text>
-                        <Button 
-                            variant="danger" 
-                            onClick={handleDeregister}
-                            className="mt-3"
-                        >
-                            Remove account permanently
-                        </Button>
-                    </Card.Body>
-                </Card>
-            </Col>
-
-            {/* --- Update Form Card --- */}
+            {/* --- Update Form Card (single card, left aligned) --- */}
             <Col md={6}>
                 <Card className="h-100">
                     <Card.Body>
                         <Card.Title>Update Information</Card.Title>
                         <Form onSubmit={handleUpdate}>
-
                             <Form.Group className="mb-3" controlId="formUsername">
                                 <Form.Label>Username: </Form.Label>
                                 <Form.Control
@@ -190,7 +187,6 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                                     minLength="5"
                                 />
                             </Form.Group>
-                            
                             <Form.Group className="mb-3" controlId="formPassword">
                                 <Form.Label>New Password: </Form.Label>
                                 <InputGroup>
@@ -209,7 +205,6 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                                 </InputGroup>
                                 <Form.Text muted>Leave blank to keep current password.</Form.Text>
                             </Form.Group>
-
                             <Form.Group className="mb-3" controlId="formEmail">
                                 <Form.Label>Email: </Form.Label>
                                 <Form.Control
@@ -219,7 +214,6 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                                     onChange={handleChange}
                                 />
                             </Form.Group>
-
                             <Form.Group className="mb-3" controlId="formBirthday">
                                 <Form.Label>Birthday: </Form.Label>
                                 <Form.Control
@@ -229,8 +223,12 @@ export const ProfileView = ({ user, token, movies, onLoggedOut, onUserUpdate, on
                                     onChange={handleChange}
                                 />
                             </Form.Group>
-
-                            <Button variant="primary" type="submit">Update</Button>
+                            <div className="d-flex flex-column align-items-end gap-2 mt-3">
+                                <Button variant="primary" type="submit">Update</Button>
+                                <Button variant="link" className="text-danger" onClick={handleDeregister}>
+                                    Remove account permanently
+                                </Button>
+                            </div>
                         </Form>
                     </Card.Body>
                 </Card>

@@ -97,3 +97,25 @@ Attribution
 Security
 
 - Do not commit your TMDb API key. Use environment variables (as shown) or a local `.env` file excluded via `.gitignore` if you need persistence for development.
+
+## Session handling
+
+This project follows a conservative session policy for user profile updates:
+
+- Non-sensitive updates (email, birth date): the backend updates the database and returns the updated user object. The frontend updates the stored `user` in localStorage and keeps the current JWT token; the user remains logged in.
+
+- Sensitive updates (username, password): the backend revokes the current JWT for security. The frontend forces a logout (clears `localStorage` and in-memory state) and redirects the user to the login page. The profile UI displays a brief alert explaining the reason for logout.
+
+Why this approach?
+- Username changes affect session identity and many client-side paths; forcing re-login avoids subtle inconsistencies.
+- Password changes are security-critical; forcing re-authentication prevents session fixation or retained access from other tokens.
+
+How to test locally
+1. Start backend and frontend.
+2. Log in as a user and open the profile page.
+3. Update email or birth date — you should see a success alert and remain logged in.
+4. Update username or password — you should see an alert, be logged out, and land on the login page.
+
+If you later change the backend to return a new JWT for certain profile updates, update `src/components/main-view/main-view.jsx`'s `onUserUpdate` handler to accept and store the returned token.
+
+```
