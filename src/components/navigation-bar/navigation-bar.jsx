@@ -10,11 +10,15 @@
 // --- React and other Third-party libraries ---
 import PropTypes from "prop-types";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 // --- Local application imports (none required) ---
 
 export const NavigationBar = ({ user, onLoggedOut }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const isMoviePage = location.pathname && location.pathname.startsWith("/movies/");
+
     return (
         <Navbar expand="lg" className="bg-body-tertiary align-items-end">
             <Container>
@@ -27,6 +31,16 @@ export const NavigationBar = ({ user, onLoggedOut }) => {
                         <Nav className="ms-3 me-auto">
                             <Nav.Link as={Link} to="/">Home</Nav.Link>
                             <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
+                            {/* Back link (appears on movie detail pages). Route-only: navigate to saved origin or '/' */}
+                            {isMoviePage && (
+                                <Nav.Link
+                                    onClick={() => navigate(location.state?.from || '/')}
+                                    aria-label="Go back"
+                                    className="text-muted"
+                                >
+                                    Back
+                                </Nav.Link>
+                            )}
                         </Nav>
                     )}
 

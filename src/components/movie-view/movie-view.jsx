@@ -9,7 +9,7 @@
 import PropTypes from "prop-types";
 import { Button, Card, CardImg, Carousel, Row, Col } from "react-bootstrap";
 import { Heart, HeartFill } from "react-bootstrap-icons";
-import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
+import { useParams, useLocation, Link } from "react-router-dom";
 
 // --- Local application imports (none required) ---
 import { MovieCard } from "../movie-card/movie-card";
@@ -18,7 +18,6 @@ import { MovieCard } from "../movie-card/movie-card";
 export const MovieView = ({ movies, user, onToggleFavorite }) => {
     const { movieId } = useParams();
     const location = useLocation();
-    const navigate = useNavigate();
     const backPath = location.state?.from || "/";
 
     const movie = movies.find(m => m._id === movieId);
@@ -101,15 +100,10 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
 
                         {/* Right upper quarter: poster (centered) */}
                         <Col md={6} className="d-flex align-items-center justify-content-center p-3 ps-md-5">
-                            <img src={movie.image_url} alt={`${movie.title} poster`} className="img-fluid" style={{ maxHeight: '40vh', objectFit: 'contain' }} />
+                            <CardImg src={movie.image_url} alt={`${movie.title} poster`} className="img-fluid" style={{ maxHeight: '40vh', objectFit: 'contain' }} />
                         </Col>
                     </Row>
                 </Card>
-            </div>
-
-            {/* Back link */}
-            <div className="mb-3">
-                <Button as={Link} to={backPath} variant="secondary">Back</Button>
             </div>
 
             {/* Lower half: similar movies carousel */}
@@ -118,7 +112,7 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
                 {similarMovies.length === 0 ? (
                     <p>No similar movies found.</p>
                 ) : (
-                    <Carousel interval={null} indicators={true} className="carousel-dark">
+                    <Carousel interval={null} indicators={true} className="favorites-carousel carousel-dark">
                         {similarSlides.map((slide, idx) => (
                             <Carousel.Item key={idx}>
                                 <Row className="g-4 justify-content-center py-4">
@@ -128,7 +122,7 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
                                                 movie={sm}
                                                 onToggleFavorite={onToggleFavorite}
                                                 isFavorite={user.favorites && user.favorites.includes(sm._id)}
-                                                navState={{ from: `/movies/${movie._id}` }}
+                                                navState={{ from: location.pathname }}
                                             />
                                         </Col>
                                     ))}
@@ -150,9 +144,9 @@ MovieView.propTypes = {
             _id: PropTypes.string.isRequired,
             title: PropTypes.string.isRequired,
             description: PropTypes.string.isRequired,
-            release_year: PropTypes.string.isRequired,
+            release_year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
             image_url: PropTypes.string.isRequired,
-            rating_imdb: PropTypes.string,
+            rating_imdb: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
             featured: PropTypes.bool,
             starring: PropTypes.arrayOf(PropTypes.string),
             director: PropTypes.shape({
