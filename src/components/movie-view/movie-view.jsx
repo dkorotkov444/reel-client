@@ -1,4 +1,6 @@
-/*  src/components/movie-view/movie-view.jsx
+/*  
+ * src/components/movie-view/movie-view.jsx
+ *
  * Movie detail view component
  *
  * (c) 2025 Dmitri Korotkov
