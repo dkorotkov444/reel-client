@@ -9,7 +9,7 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import { useState, useEffect } from "react";
-import { Col, Row, Pagination } from "react-bootstrap";
+import { Col, Row, Pagination, Form } from "react-bootstrap";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // --- Local application imports ---
@@ -41,6 +41,7 @@ export const MainView = () => {
     const [movies, setMovies] = useState([]);                 // Movies state to hold the list of movies fetched from the API
     const [loading, setLoading] = useState(true);             // Movie loading state
     const [currentPage, setCurrentPage] = useState(1);        // Pagination state to hold the current page number (start on page 1)
+    const [searchTerm, setSearchTerm] = useState("");       // Search input state
 
     // Boolean constants for visibility
     const showFooter = user && (!loading || movies.length > 0); // Only show Footer when user is logged in and movie posters are on screen
@@ -48,12 +49,28 @@ export const MainView = () => {
 
     // Constants for pagination
     const itemsPerPage = 8;
-    const totalPages = Math.ceil(movies.length / itemsPerPage);
 
-    // Calculate which movies to display
+    // If user entered a search term of at least 5 characters, filter the movies client-side
+    // Otherwise, keep the original full list and behavior unchanged.
+    const query = searchTerm.trim();
+    let filteredMovies = movies;
+    if (query.length >= 5) {
+        const q = query.toLowerCase();
+        filteredMovies = movies.filter(m => {
+            const title = (m.title || "").toLowerCase();
+            const director = (m.director && m.director.name) ? m.director.name.toLowerCase() : "";
+            const genre = (m.genre && m.genre.name) ? m.genre.name.toLowerCase() : "";
+            const starring = Array.isArray(m.starring) ? m.starring.join(' ').toLowerCase() : "";
+            return title.includes(q) || director.includes(q) || genre.includes(q) || starring.includes(q);
+        });
+    }
+
+    const totalPages = Math.ceil(filteredMovies.length / itemsPerPage) || 1;
+
+    // Calculate which movies to display (based on filteredMovies)
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const moviesToShow = movies.slice(startIndex, endIndex);
+    const moviesToShow = filteredMovies.slice(startIndex, endIndex);
 
     // --- Favorite Toggle Function ---
     const handleToggleFavorite = (movieId, isAdding) => {
@@ -114,7 +131,25 @@ export const MainView = () => {
         fetch('https://reel-movie-api-608b8b4b3a04.herokuapp.com/movies', {
             headers: { Authorization: `Bearer ${token}` },
         })
-            .then((response) => response.json())
+            .then((response) => {
+                // Handle auth errors explicitly before attempting to parse JSON
+                if (response.status === 401 || response.status === 403) {
+                    // Unauthorized: clear localStorage and force login
+                    localStorage.clear();
+                    setUser(null);
+                    setToken(null);
+                    setCurrentPage(1);
+                    setLoading(false);
+                    alert('Session expired or unauthorized. Please log in again.');
+                    throw new Error('Unauthorized');
+                }
+                if (!response.ok) {
+                    // Non-auth error (e.g., 500) - throw so catch() handles it
+                    throw new Error(`Failed to fetch movies: ${response.status} ${response.statusText}`);
+                }
+                // Safe to parse JSON
+                return response.json();
+            })
             .then((data) => {
                 const moviesFromApi = data.map((doc) => {
                     return {
@@ -142,6 +177,11 @@ export const MainView = () => {
                 setLoading(false); // Set loading state to false after data is fetched
             })
             .catch((error) => {
+                // Only log and update loading when it's not the intentional 'Unauthorized' error
+                if (error.message === 'Unauthorized') {
+                    console.warn('Fetch aborted due to unauthorized response.');
+                    return;
+                }
                 console.error('Error fetching movies:', error);
                 setLoading(false); // Set loading state to false in case of error
             });
@@ -255,8 +295,21 @@ export const MainView = () => {
                                     <Col>The movie list is empty!</Col>
                                 ) : (
                                     <>
-                                        {/* Main view - movie cards (rendered when no movie selected) */}
-                                        {moviesToShow.map((movie) => (                        
+                                        {/* Search (minimal) - only filters when user types 5+ chars */}
+                                        <Row className="justify-content-center mb-3">
+                                            <Col md={6} className="mx-auto">
+                                                <Form.Control
+                                                    type="search"
+                                                    placeholder="Search"
+                                                    aria-label="Search movies"
+                                                    value={searchTerm}
+                                                    onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                                                />
+                                            </Col>
+                                        </Row>
+
+                                        {/* Main view - movie cards (rendered when no movie selected). If searchTerm < 5 chars, this shows the full list as before. */}
+                                        {moviesToShow.map((movie) => (
                                             <Col className="mb-5" key={movie._id} md={3}>
                                                 {/* Pass complete movie data to MovieCard component */}
                                                 <MovieCard 
@@ -266,7 +319,7 @@ export const MainView = () => {
                                                     isFavorite={user.favorites && user.favorites.includes(movie._id)}
                                                     navState={{ from: "/" }}    // Pass the navState for the home page
                                                 />
-                                            </Col>                                        
+                                            </Col>
                                         ))}
                                         {/* Pagination component */}
                                         {totalPages > 1 && (
