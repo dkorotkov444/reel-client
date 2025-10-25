@@ -1,121 +1,169 @@
 # REEL — React Frontend (reel-client)
 
-Small single-page React application used as the frontend for the REEL movie app.
+Very short summary: A small single-page React app that serves as the frontend for the REEL movie demo — browse movies, view details, favorite items, and search the catalog.
 
-## Quick summary
-- Entry HTML: `src/index.html` — contains `<div id="root"></div>` and loads `src/index.jsx` as an ES module.
-- Entry module: `src/index.jsx` — root React component `ReelApplication`, uses `createRoot`.
-- Styling: `src/index.scss` is imported from the app entry (`import "./index.scss"`). The repo exposes a global SCSS variable (`$color`).
-- Dependencies: `react`, `react-dom`. Dev helper: `@parcel/transformer-sass` is present in `devDependencies`.
-- There are currently no `start`/`build` scripts in `package.json`.
+## Table of Contents
+- Quick Start
+- Project Overview / Technical Summary
+- Features & UX
+- Data & API
+- Session & Auth policy
+- Developer details / Project structure
+- Styling / Assets
+- Tests / Linting / CI
+- Troubleshooting
+- License & metadata
 
-## Prerequisites
-- Node.js (LTS recommended)
-- npm
+## Quick Start
 
-## Install
-1. Install project dependencies:
-   ```
-   npm install
-   ```
-
-## Run (recommended minimal approach)
-This project expects Parcel v2 as the bundler (inferred from `@parcel/transformer-sass`). Because there are no scripts, run via npx:
-```
-npx parcel src/index.html
-```
-Open the address printed by Parcel (typically http://localhost:1234).
-
-## Build for production
-```
-npx parcel build src/index.html
-```
-
-## Suggested npm scripts (optional)
-Add these to `package.json` if you want shortcuts:
-```json
-"scripts": {
-  "start": "parcel src/index.html",
-  "build": "parcel build src/index.html",
-  "test": "echo \"Error: no test specified\" && exit 1"
-}
-```
-If you add these scripts, also add `parcel` as a devDependency and run `npm install`. Include a short justification for added dependencies in PRs.
-
-## Project structure & conventions
-- Keep a single HTML entry and the `#root` mount. Do not convert to multi-entry without maintainer approval.
-- Use ES modules (`type="module"`) in `src/index.html`.
-- Place React components under `src/` and use `.jsx` for files. Prefer small stateless functional components (see `src/index.jsx` for pattern).
-- Import global styles from `src/index.scss` in the entrypoint. Component-level SCSS may be imported from individual component files when needed.
-- Use React 18+ root API: `createRoot(container).render(<ReelApplication />)`.
-
-## Files to reference
-- `src/index.html`
-- `src/index.jsx`
-- `src/index.scss`
-- `package.json`
-- `.github/copilot-instructions.md` (AI agent guidance)
-
-## What is NOT in this repo (avoid assumptions)
-- No API client, environment files, or secret management detected. Do not add code that depends on backend URLs or secret keys without maintainer guidance.
-- No tests, linters, or CI config. If adding them, update `package.json` and document the rationale in the PR.
-
-## Troubleshooting
-- If SCSS compilation fails: run via `npx parcel` (ensure Parcel v2) or install `parcel` locally alongside `@parcel/transformer-sass`.
-- For missing module errors, confirm `node_modules` exists and `npm install` completed successfully.
-
-## Contributing
-- Keep changes small and easy to review.
-- If you add dependencies (e.g., `parcel`), include a short justification and how to run the app in the PR description.
-- Preserve `src/index.html` and the `#root` mount when refactoring.
-- For UI changes include a screenshot or short demo steps in the PR.
-
-## License & metadata
-See `package.json` for author, license, and repository links.
-
-## Poster images (TMDb)
-
-- This project uses poster images sourced from The Movie Database (TMDb). Poster URLs have been saved into `tools/movies.js` so the front-end can use direct image links (no runtime scraping).
-- The script used to fetch posters is `tools/fetch_tmdb_posters.js`. It queries the TMDb API once per movie title/year and writes results to `tools/movies-with-posters.json` (and `tools/movies-with-posters.js` with a TMDb attribution header).
-
-How to regenerate posters (local only)
-
-1. Obtain a TMDb API key (requires a free account): https://www.themoviedb.org/settings/api
-2. Set the key in your PowerShell session and run the script from the repo root:
+1. Install dependencies:
 
 ```powershell
-$env:TMDB_API_KEY = "your_tmdb_api_key_here"
-node .\tools\fetch_tmdb_posters.js
+npm install
 ```
 
-3. This writes `tools/movies-with-posters.json` and `tools/movies-with-posters.js` (the latter contains an attribution comment). If you prefer, you can copy the poster URLs into `tools/movies.js`.
+2. Start the dev server (Parcel v2 is used in this project):
 
-Attribution
-
-- Per TMDb terms, include visible attribution in your UI where TMDb content is shown. A minimal attribution line is present in the app footer: "Poster images provided by TMDb" linking to https://www.themoviedb.org/.
-
-Security
-
-- Do not commit your TMDb API key. Use environment variables (as shown) or a local `.env` file excluded via `.gitignore` if you need persistence for development.
-
-## Session handling
-
-This project follows a conservative session policy for user profile updates:
-
-- Non-sensitive updates (email, birth date): the backend updates the database and returns the updated user object. The frontend updates the stored `user` in localStorage and keeps the current JWT token; the user remains logged in.
-
-- Sensitive updates (username, password): the backend revokes the current JWT for security. The frontend forces a logout (clears `localStorage` and in-memory state) and redirects the user to the login page. The profile UI displays a brief alert explaining the reason for logout.
-
-Why this approach?
-- Username changes affect session identity and many client-side paths; forcing re-login avoids subtle inconsistencies.
-- Password changes are security-critical; forcing re-authentication prevents session fixation or retained access from other tokens.
-
-How to test locally
-1. Start backend and frontend.
-2. Log in as a user and open the profile page.
-3. Update email or birth date — you should see a success alert and remain logged in.
-4. Update username or password — you should see an alert, be logged out, and land on the login page.
-
-If you later change the backend to return a new JWT for certain profile updates, update `src/components/main-view/main-view.jsx`'s `onUserUpdate` handler to accept and store the returned token.
-
+```powershell
+npm run start
+# or, if you prefer npx directly:
+npx parcel src/index.html
 ```
+
+Notes:
+- The `start` and `build` scripts are defined in `package.json` and invoke Parcel. If you add or change scripts, document them in PRs.
+
+## Project Overview / Technical Summary
+
+- Tech stack: React (v18+), React Router (v6), React-Bootstrap, Parcel v2, Bootstrap 5.
+- Single-page app. Entry files:
+  - `src/index.html` — HTML entry mount (`#root`).
+  - `src/index.jsx` — React app bootstrap (uses React 18 createRoot API).
+- High-level data flow:
+  - `MainView` (root app view) fetches the movie list from the API and holds the central session/user state.
+  - Movie cards are rendered on the main view; selecting a movie opens `MovieView` (details + similar carousel).
+  - Favorite toggles and profile updates are handled through APIs and update the central user state.
+
+## Features & UX
+
+- Main features:
+  - Browse paginated movie cards on the main view.
+  - Movie detail view with poster and metadata.
+  - "Similar movies" carousel (genre-based similarity).
+  - Favorite/unfavorite movies (saved to user profile).
+  - Simple client-side search on the main view.
+
+- UX details:
+  - Search (Main view):
+    - Centered search field on the main page.
+    - Search only applies when the query is at least 5 characters long; otherwise the full list and original pagination are shown.
+    - Case-insensitive substring match against: `title`, `starring` (joined), `director.name`, and `genre.name`.
+    - Filtering is client-side and resets pagination to page 1 on new queries.
+
+  - Movie view:
+    - Split layout: left column shows details (title, director, genre, description, release year, IMDb rating, starring list), right column shows the poster.
+    - Director and Genre names show accessible tooltips with the director biography and genre description respectively (keyboard-focusable and aria-friendly).
+    - Starring list rendered as a comma-and-space separated line (e.g., "Actor A, Actor B").
+
+  - Similar movies:
+    - Deterministic rule: movies whose `genre.name` matches the current movie's `genre.name` (case-insensitive) are considered similar and shown in the lower carousel.
+
+  - Favorites:
+    - Favorite toggles are available on cards and the MovieView (heart icon). Toggling calls the user favorites API and updates stored user in localStorage.
+
+  - Back navigation:
+    - Links to MovieView pass `state.from` (origin) so the Back control can navigate to the originating list. A Back link is present in the navbar and prefers history-first navigation when appropriate (falls back to `state.from || '/'`).
+
+  - Accessibility notes:
+    - Tooltips are keyboard-focusable (`tabIndex=0`, `role="button"`) and rendered with React-Bootstrap's OverlayTrigger/Tooltip.
+    - Favorite buttons use `aria-pressed` and descriptive `aria-label`s.
+
+## Data & API
+
+- Endpoints used by the frontend (examples used in code):
+  - GET /movies — fetch movies list (example in code: `https://reel-movie-api-608b8b4b3a04.herokuapp.com/movies`).
+  - Favorites toggle: `/users/:username/:movieId` (PATCH to add, DELETE to remove) — the exact base URL is the same API host as movies.
+
+- Movie object shape (fields the UI expects):
+  - `_id` (string)
+  - `title` (string)
+  - `description` (string)
+  - `release_year` (string|number)
+  - `image_url` (string)
+  - `rating_imdb` (string|number)
+  - `featured` (bool)
+  - `starring` (array of strings)
+  - `director`: { name, bio, birth_date, death_date }
+  - `genre`: { name, description }
+
+- Poster images & TMDb
+  - Poster URLs are managed by scripts in `tools/` (see `tools/fetch_tmdb_posters.js`) and poster URLs are stored in `tools/movies.js` (or `tools/movies-with-posters.json`).
+
+## Session & Auth policy
+
+- Session state lives in `localStorage` (user object and token) and is mirrored in-memory in `MainView`.
+- Policy:
+  - Non-sensitive profile updates (email, birth date) update the stored user and preserve the session/token.
+  - Sensitive updates (username, password) revoke the current JWT on the server; the frontend forces logout (clears localStorage and in-memory user/token) and redirects to login.
+- Token handling hint: the app sends `Authorization: Bearer <token>` headers on API calls and handles 401/403 responses by clearing session and prompting re-login.
+
+## Developer details / Project structure
+
+- Key files to inspect:
+  - `src/index.html`, `src/index.jsx`, `src/index.scss`
+  - `src/components/main-view/main-view.jsx` — app root, fetches movies, holds session state, contains search and main card grid.
+  - `src/components/movie-view/movie-view.jsx` — movie details and similar-movies carousel.
+  - `src/components/movie-card/movie-card.jsx` — small card used in lists and carousels.
+  - `src/components/navigation-bar/navigation-bar.jsx` — top navigation and Back link.
+  - `src/components/profile-view/profile-view.jsx` — profile editing and favorites carousel.
+
+- Conventions:
+  - Add components under `src/` using `.jsx`.
+  - Import global styles from `src/index.scss` in `src/index.jsx`.
+  - Pass `navState` (`{ from: ... }`) when linking to MovieView so Back navigation is deterministic.
+  - Use functional components and React hooks.
+
+## Styling / Assets
+
+- Styling: SCSS is used for project styles. Root stylesheet: `src/index.scss` (imported from `index.jsx`).
+- Bootstrap: project uses Bootstrap 5 and `react-bootstrap` components for layout and interactive controls.
+
+## Tests / Linting / CI
+
+- Current state: no automated tests, linter, or CI configuration present.
+- Recommendations:
+  - Add basic unit tests for pure logic (search filtering) and a small integration/smoke test for critical flows.
+  - Consider adding ESLint + Prettier for consistent formatting.
+
+## Troubleshooting
+
+- Parcel HMR module error ("Cannot find module '...'" in dev console):
+  - Hard refresh the browser (Ctrl+F5).
+  - If it persists, stop the dev server and clear Parcel cache then restart (PowerShell):
+
+```powershell
+Remove-Item -Recurse -Force .parcel-cache
+Remove-Item -Recurse -Force dist
+npm run start
+```
+
+- 401 Unauthorized + JSON parse error (Unexpected token 'U' when parsing "Unauthorized"):
+  - The API returned plain-text error. The client now checks response.status before calling `response.json()` and handles 401/403 by clearing session and alerting the user. If you see this error, verify token validity and inspect the API response.
+
+- To disable HMR if it causes instability with Parcel during development:
+
+```powershell
+npm run start -- --no-hmr
+```
+
+- Fullscreen/Editor tips (if you entered fullscreen accidentally):
+  - VS Code: press F11 to toggle Full Screen; Ctrl+K then Z toggles Zen Mode; Esc Esc to exit Zen Mode.
+  - Browser: F11 toggles browser full screen.
+
+- Where to look for runtime errors:
+  - Browser developer console (Console & Network tabs).
+  - Terminal running `npm run start` (Parcel output and HMR logs).
+
+## License & metadata
+
+- See `package.json` for author and license information.
