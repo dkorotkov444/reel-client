@@ -9,7 +9,7 @@
 // --- Core Node.js modules (none used here) ---
 // --- React and other Third-party libraries ---
 import PropTypes from "prop-types";
-import { Button, Card, CardImg, Carousel, Row, Col } from "react-bootstrap";
+import { Button, Card, CardImg, Carousel, Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Heart, HeartFill } from "react-bootstrap-icons";
 import { useParams, useLocation, Link } from "react-router-dom";
 
@@ -77,19 +77,62 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
                     )}
 
                     <Row className="g-0 h-100 align-items-center">
-                        {/* Left upper quarter: text */}
-                        <Col md={6} className="p-4 pe-md-5">
-                            <Card.Body className="p-0 h-100 d-flex flex-column">
+                        {/* Left upper quarter: text (do not stretch full height; nudge down slightly so title aligns with poster top) */}
+                        <Col md={6} className="p-4 pe-md-5" style={{ paddingTop: '3vh' }}>
+                            <Card.Body className="p-0 d-flex flex-column">
                                 <div>
                                     <Card.Title className="mb-2">{movie.title}</Card.Title>
                                 </div>
 
                                 <div className="d-flex justify-content-between mb-2">
-                                    <div className="text-start"><strong>Director:</strong> {movie.director?.name}</div>
-                                    <div className="text-end"><strong>Genre:</strong> {movie.genre?.name}</div>
+                                    <div className="text-start">
+                                        <strong>Director:</strong>{' '}
+                                        {movie.director?.name ? (
+                                            <OverlayTrigger
+                                                placement="top"
+                                                overlay={
+                                                    <Tooltip id={`director-tooltip-${movie._id}`}>
+                                                        {movie.director?.bio ?? 'No biography available.'}
+                                                    </Tooltip>
+                                                }
+                                            >
+                                                <span tabIndex={0} role="button" className="text-decoration-underline" aria-label={`Director biography for ${movie.director?.name}`}>
+                                                    {movie.director.name}
+                                                </span>
+                                            </OverlayTrigger>
+                                        ) : (
+                                            <span>Unknown</span>
+                                        )}
+                                    </div>
+                                    <div className="text-end">
+                                        <strong>Genre:</strong>{' '}
+                                        {movie.genre?.name ? (
+                                            <OverlayTrigger
+                                                placement="top"
+                                                overlay={
+                                                    <Tooltip id={`genre-tooltip-${movie._id}`}>
+                                                        {movie.genre.description ?? 'No description available.'}
+                                                    </Tooltip>
+                                                }
+                                            >
+                                                <span tabIndex={0} role="button" className="text-decoration-underline">
+                                                    {movie.genre.name}
+                                                </span>
+                                            </OverlayTrigger>
+                                        ) : (
+                                            <span>Unknown</span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="mb-2"><Card.Text>{movie.description}</Card.Text></div>
+
+                                {/* Starring list: comma + space separated */}
+                                {movie.starring && movie.starring.length > 0 ? (
+                                    <Card.Text className="mb-2"><strong>Starring:</strong> {movie.starring.join(', ')}</Card.Text>
+                                ) : (
+                                    <Card.Text className="mb-2"><strong>Starring:</strong> N/A</Card.Text>
+                                )}
 
                                 <div>
                                     <Card.Text className="mb-1"><strong>Release year:</strong> {movie.release_year}</Card.Text>
